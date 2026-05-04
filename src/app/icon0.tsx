@@ -3,6 +3,10 @@ import { ImageResponse } from "next/og";
 export const size = { width: 192, height: 192 };
 export const contentType = "image/png";
 
+// Bølger sentrert i 40x40 viewBox:
+// - Horisontalt: x=4 til x=36 (4 enheter margin på hver side)
+// - Vertikalt: y=10 til y=28, sentrum y=19, midtbølge på y=19
+// - Hver bølge er 6 enheter høy, 32 enheter bred (4 halvbølger à 8 brede)
 export default function Icon() {
   return new ImageResponse(
     (
@@ -11,64 +15,42 @@ export default function Icon() {
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background:
-            "radial-gradient(ellipse at 35% 30%, #4da8cc 0%, #1a6080 45%, #0a2a3d 100%)",
-          borderRadius: 43,
+          background: "#0a2a3d",
+          borderRadius: 42,
           position: "relative",
-          overflow: "hidden",
         }}
       >
-        {/* Bølgekam-glow */}
-        <div
-          style={{
-            position: "absolute",
-            top: 56,
-            left: 50,
-            width: 18,
-            height: 18,
-            borderRadius: "50%",
-            background: "#e8f4f8",
-            boxShadow: "0 0 20px rgba(232, 244, 248, 0.6)",
-          }}
-        />
-        {/* Bølgelinjer i bakgrunnen */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 28,
-            left: 0,
-            width: "100%",
-            height: 3,
-            background: "rgba(232, 244, 248, 0.25)",
-            borderRadius: 2,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: 18,
-            left: 0,
-            width: "100%",
-            height: 2,
-            background: "rgba(232, 244, 248, 0.15)",
-            borderRadius: 2,
-          }}
-        />
-        <div
-          style={{
-            fontFamily: "Georgia, serif",
-            fontSize: 110,
-            fontStyle: "italic",
-            fontWeight: 500,
-            color: "#f5f9fb",
-            letterSpacing: "-0.04em",
-            marginTop: 18,
-          }}
+        <svg
+          width="192"
+          height="192"
+          viewBox="0 0 40 40"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ display: "block" }}
         >
-          B
-        </div>
+          <path
+            d="M4 13 Q10 8 16 13 T28 13 T36 13"
+            stroke="white"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M4 20 Q10 15 16 20 T28 20 T36 20"
+            stroke="white"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.85"
+          />
+          <path
+            d="M4 27 Q10 23.5 16 27 T28 27 T36 27"
+            stroke="#7dd3fc"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.75"
+          />
+        </svg>
       </div>
     ),
     { ...size }

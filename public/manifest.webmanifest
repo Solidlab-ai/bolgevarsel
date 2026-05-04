@@ -1,0 +1,26 @@
+{
+  "name": "Bølgevarsel — Daglig sjøvarsel for kysten",
+  "short_name": "Bølgevarsel",
+  "description": "Få daglig bølge- og værvarsel direkte på SMS — skreddersydd for din kystlokasjon langs norskekysten.",
+  "start_url": "/min-side?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e8f4f8",
+  "theme_color": "#0a2a3d",
+  "lang": "nb-NO",
+  "dir": "ltr",
+  "categories": ["weather", "travel", "lifestyle", "utilities"],
+  "icons": [
+    {"src": "/icon0", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/icon1", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/icon1", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "/apple-icon", "sizes": "180x180", "type": "image/png", "purpose": "any"}
+  ],
+  "shortcuts": [
+    {"name": "Min side", "short_name": "Min side", "description": "Se dine varsler og innstillinger", "url": "/min-side?source=pwa-shortcut", "icons": [{"src": "/icon0", "sizes": "192x192"}]},
+    {"name": "Live sjø-dashboard", "short_name": "Sjø", "description": "Se live bølgedata", "url": "/dashboard?source=pwa-shortcut", "icons": [{"src": "/icon0", "sizes": "192x192"}]},
+    {"name": "Sjokamera", "short_name": "Kamera", "description": "Webkamera langs kysten", "url": "/sjokamera?source=pwa-shortcut", "icons": [{"src": "/icon0", "sizes": "192x192"}]}
+  ],
+  "prefer_related_applications": false
+}

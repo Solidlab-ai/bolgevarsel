@@ -1,6 +1,7 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
 import './globals.css'
 
 const BASE = 'https://bolgevarsel.no'
@@ -16,6 +17,16 @@ export const metadata: Metadata = {
   authors: [{ name: 'Bølgevarsel', url: BASE }],
   creator: 'Solidlab.ai',
   publisher: 'Solidlab.ai',
+  applicationName: 'Bølgevarsel',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Bølgevarsel',
+    statusBarStyle: 'black-translucent',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   alternates: {
     canonical: BASE,
   },
@@ -47,10 +58,18 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#0a2a3d',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="no">
-      <body>{children}<Analytics /><SpeedInsights /></body>
+      <body>{children}<ServiceWorkerRegister /><Analytics /><SpeedInsights /></body>
     </html>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import styles from './Nav.module.css'
+import InstallButton from './InstallButton'
 
 const links = [
   { href: '#hvordan', label: 'Hvordan det fungerer' },
@@ -35,6 +36,7 @@ export default function Nav() {
         </ul>
 
         <div className={styles.navRight}>
+          <InstallButton variant="nav" />
           <a href="/min-side" className={styles.cta}>Logg inn</a>
           <button className={styles.hamburger} onClick={() => setOpen(!open)} aria-label="Meny">
             <span className={`${styles.bar} ${open ? styles.barTop : ''}`}/>
@@ -64,6 +66,7 @@ export default function Nav() {
           ))}
         </ul>
         <div className={styles.drawerFooter}>
+          <InstallButton variant="drawer" />
           <a href="/min-side" className={styles.drawerLogin}>Logg inn</a>
           <a href="/registrer" className={styles.drawerCta}>Start 7 dager gratis →</a>
         </div>

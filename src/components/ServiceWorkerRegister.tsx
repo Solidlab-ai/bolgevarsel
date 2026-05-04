@@ -51,18 +51,18 @@ export function ServiceWorkerRegister() {
       e.preventDefault();
       setInstallEvent(e as BeforeInstallPromptEvent);
 
-      // Vis prompt etter 2+ besøk hvis ikke avvist siste 7 dager
-      // 5 sek delay så vi ikke driter til landing page conversion
-      if (visits >= 2 && !dismissedRecently) {
-        setTimeout(() => setShowPrompt(true), 5000);
+      // Vis prompt etter 1+ besøk hvis ikke avvist siste 7 dager
+      // 4 sek delay så vi ikke driter til landing page conversion
+      if (visits >= 1 && !dismissedRecently) {
+        setTimeout(() => setShowPrompt(true), 4000);
       }
     };
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    // Vis iOS-guide etter 2+ besøk hvis Safari
-    if (iosSafari && visits >= 2 && !dismissedRecently) {
-      setTimeout(() => setShowIOSGuide(true), 6000);
+    // Vis iOS-guide etter 1+ besøk hvis Safari
+    if (iosSafari && visits >= 1 && !dismissedRecently) {
+      setTimeout(() => setShowIOSGuide(true), 5000);
     }
 
     return () => window.removeEventListener("beforeinstallprompt", handler);

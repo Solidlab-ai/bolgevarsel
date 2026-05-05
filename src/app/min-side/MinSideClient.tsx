@@ -204,6 +204,12 @@ export default function MinSideClient() {
           setSub(d.subscriber); setLocs(d.locations||[]); setRecs(d.recipients||[])
           if (d.emergency_contacts) setEmergencyContacts(d.emergency_contacts)
           setEmail(d.subscriber.email); setSendTime(d.subscriber.send_time||'07:30'); setView('dash')
+          // Lagre i localStorage så SosButton + andre komponenter kan lese plan/email på tvers av sider
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('bv_email', d.subscriber.email)
+            localStorage.setItem('bv_plan', d.subscriber.plan)
+            localStorage.setItem('bv_plan_cached_at', String(Date.now()))
+          }
         } else {
           const saved = localStorage.getItem('bv_email')
           if (saved) {

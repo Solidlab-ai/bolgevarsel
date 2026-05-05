@@ -18,13 +18,6 @@ export default function SosButton({ variant = 'nav' }: SosButtonProps) {
     setMounted(true)
     if (typeof window === 'undefined') return
 
-    // Krever at brukeren er innlogget
-    const email = localStorage.getItem('bv_email')
-    if (!email) {
-      setShow(false)
-      return
-    }
-
     // Cache plan i localStorage for å unngå unødvendige API-kall mellom sider
     const cachedPlan = localStorage.getItem('bv_plan')
     const cachedAt = parseInt(localStorage.getItem('bv_plan_cached_at') || '0', 10)
@@ -35,18 +28,26 @@ export default function SosButton({ variant = 'nav' }: SosButtonProps) {
       return
     }
 
-    // Hent fra session-API
+    // Hent fra session-API. Cookie-basert auth, så fungerer selv uten bv_email i localStorage.
     fetch('/api/min-side/session')
       .then((r) => r.json())
       .then((d) => {
         const plan = d?.subscriber?.plan
-        if (plan) {
+        const email = d?.subscriber?.email
+        if (plan && email) {
+          // Sikre at både plan og email er cachet (Nav.tsx bruker bv_email for "Min side")
+          localStorage.setItem('bv_email', email)
           localStorage.setItem('bv_plan', plan)
           localStorage.setItem('bv_plan_cached_at', String(Date.now()))
           setShow(plan === 'sikkerhet')
+        } else {
+          // Ikke innlogget
+          setShow(false)
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setShow(false)
+      })
   }, [])
 
   if (!mounted || !show) return null

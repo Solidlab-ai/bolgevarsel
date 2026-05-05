@@ -54,7 +54,7 @@ export default function LastNedClient() {
             </svg>
           </div>
           <h1 style={S.h1}>Du har allerede appen!</h1>
-          <p style={S.lead}>Bølgevarsel er allerede installert på enheten din. 🎉</p>
+          <p style={S.lead}>Bølgevarsel er allerede installert på enheten din.</p>
           <a href="/min-side" style={S.btnPrimary}>Åpne Min side</a>
         </div>
       </main>
@@ -78,10 +78,43 @@ export default function LastNedClient() {
         <div style={S.divider}/>
 
         <div style={S.benefits}>
-          <Benefit icon="🌊" text="Live sjødata for dine lokasjoner"/>
-          <Benefit icon="📱" text="Ikon på hjem-skjermen som en vanlig app"/>
-          <Benefit icon="🔔" text="Daglige varsler på SMS eller e-post"/>
-          <Benefit icon="🚨" text="SOS-knapp for nødsituasjoner (Sikkerhet-plan)"/>
+          <Benefit
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M2 11 Q5 7 8 11 Q11 15 14 11 Q17 7 18 11" stroke="#1a6080" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+                <path d="M2 15 Q5 12 8 15 Q11 18 14 15 Q17 12 18 15" stroke="#1a6080" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.5"/>
+              </svg>
+            }
+            text="Live sjødata for dine lokasjoner"
+          />
+          <Benefit
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="5" y="2" width="10" height="16" rx="1.5" stroke="#1a6080" strokeWidth="1.6" fill="none"/>
+                <line x1="9" y1="15.5" x2="11" y2="15.5" stroke="#1a6080" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+            }
+            text="Ikon på hjem-skjermen som en vanlig app"
+          />
+          <Benefit
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 8a5 5 0 0110 0v4l1.5 2h-13L5 12V8z" stroke="#1a6080" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
+                <path d="M8 16.5a2 2 0 004 0" stroke="#1a6080" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+              </svg>
+            }
+            text="Daglige varsler på SMS eller e-post"
+          />
+          <Benefit
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="#dc2626" strokeWidth="1.6" fill="none"/>
+                <line x1="10" y1="6" x2="10" y2="11" stroke="#dc2626" strokeWidth="1.8" strokeLinecap="round"/>
+                <circle cx="10" cy="14" r="0.9" fill="#dc2626"/>
+              </svg>
+            }
+            text="SOS-knapp for nødsituasjoner (Sikkerhet-plan)"
+          />
         </div>
 
         <div style={S.divider}/>
@@ -137,9 +170,9 @@ function IosInstructions() {
           <strong>Trykk «Legg til»</strong> øverst til høyre
         </li>
       </ol>
-      <p style={S.tipBox}>
-        💡 <strong>Tips:</strong> Du må bruke <strong>Safari</strong> — Chrome på iPhone støtter ikke installasjon.
-      </p>
+      <TipBox>
+        <strong>Tips:</strong> Du må bruke <strong>Safari</strong> — Chrome på iPhone støtter ikke installasjon.
+      </TipBox>
     </div>
   )
 }
@@ -170,9 +203,9 @@ function AndroidInstructions({ onInstall, canInstall }: { onInstall: () => void;
             <li className="last-ned-step"><strong>Velg «Installer app»</strong> eller «Legg til på startskjerm»</li>
             <li className="last-ned-step"><strong>Trykk «Installer»</strong> i dialogen som åpner seg</li>
           </ol>
-          <p style={S.tipBox}>
-            💡 <strong>Tips:</strong> Bruk <strong>Chrome</strong> for best resultat.
-          </p>
+          <TipBox>
+            <strong>Tips:</strong> Bruk <strong>Chrome</strong> for best resultat.
+          </TipBox>
         </>
       )}
     </div>
@@ -194,13 +227,13 @@ function DesktopInstructions() {
         Du kan også bruke Bølgevarsel direkte i nettleseren her på datamaskinen:
       </p>
       <a href="/min-side" style={S.btnPrimary}>Åpne i nettleseren</a>
-      <p style={S.tipBox}>
-        💡 <strong>Tips:</strong> Send denne lenken til deg selv via SMS eller e-post for å åpne den på mobilen:
+      <TipBox>
+        <strong>Tips:</strong> Send denne lenken til deg selv via SMS eller e-post for å åpne den på mobilen:
         <br/>
         <code style={{background:'#fff',padding:'4px 8px',borderRadius:4,marginTop:6,display:'inline-block',fontSize:12}}>
           https://bolgevarsel.no/last-ned
         </code>
-      </p>
+      </TipBox>
     </div>
   )
 }
@@ -216,11 +249,31 @@ function GenericInstructions() {
   )
 }
 
-function Benefit({ icon, text }: { icon: string; text: string }) {
+function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div style={{display:'flex',alignItems:'center',gap:12,padding:'8px 0'}}>
-      <span style={{fontSize:24}}>{icon}</span>
+    <div style={{display:'flex',alignItems:'center',gap:14,padding:'10px 0'}}>
+      <div style={{
+        width: 36, height: 36, borderRadius: 8,
+        background: '#f8fbfc', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>{icon}</div>
       <span style={{fontSize:14,color:'#0a2a3d',lineHeight:1.4}}>{text}</span>
+    </div>
+  )
+}
+
+function TipBox({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={S.tipBox}>
+      <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{flexShrink:0,marginTop:1}}>
+          <path d="M8 1.5a4.5 4.5 0 00-2.5 8.25V11a1 1 0 001 1h3a1 1 0 001-1v-1.25A4.5 4.5 0 008 1.5z" stroke="#a16207" strokeWidth="1.3" fill="none" strokeLinejoin="round"/>
+          <line x1="6.5" y1="13.5" x2="9.5" y2="13.5" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="7" y1="15" x2="9" y2="15" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+        <div style={{flex:1}}>{children}</div>
+      </div>
     </div>
   )
 }

@@ -53,11 +53,43 @@
 .previewAI em { color: rgba(255,255,255,0.7); font-style: normal; }
 
 /* Farevarsel */
-.fare { background: rgba(204,119,0,0.08); border: 1px solid rgba(204,119,0,0.25); border-radius: 20px; padding: 2.5rem; }
+.fare { background: rgba(204,119,0,0.08); border: 1px solid rgba(204,119,0,0.25); border-radius: 20px; padding: 2.5rem; position: relative; animation: farePulse 3.5s ease-in-out infinite; }
+.fare::before { content: ''; position: absolute; inset: -1px; border-radius: 20px; border: 1px solid transparent; pointer-events: none; animation: fareBorderPulse 3.5s ease-in-out infinite; }
+
+@keyframes farePulse {
+  0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+  10% { box-shadow: 0 0 24px 0 rgba(220,38,38,0.18); }
+  25% { box-shadow: 0 0 16px 0 rgba(220,38,38,0.08); }
+}
+@keyframes fareBorderPulse {
+  0%, 70%, 100% { border-color: transparent; }
+  10%, 18% { border-color: rgba(220,38,38,0.55); }
+}
 
 .fareLeft { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 
-.fareIconWrap { width: 56px; height: 56px; border-radius: 16px; background: rgba(204,119,0,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fareIconWrap { width: 56px; height: 56px; border-radius: 16px; background: rgba(204,119,0,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; animation: fareGlow 3.5s ease-in-out infinite; }
+.fareIconWrap::before { content: ''; position: absolute; inset: 0; border-radius: 16px; box-shadow: 0 0 0 0 rgba(204,119,0,0.5); animation: fareRipple 3.5s ease-out infinite; pointer-events: none; }
+.fareIcon { animation: fareShake 3.5s ease-in-out infinite; transform-origin: center; }
+
+@keyframes fareGlow {
+  0%, 70%, 100% { background: rgba(204,119,0,0.12); }
+  10%, 25% { background: rgba(204,119,0,0.22); }
+}
+@keyframes fareRipple {
+  0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(204,119,0,0); }
+  10% { box-shadow: 0 0 0 0 rgba(204,119,0,0.45); }
+  30% { box-shadow: 0 0 0 14px rgba(204,119,0,0); }
+}
+@keyframes fareShake {
+  0%, 8%, 22%, 100% { transform: rotate(0deg); }
+  10%, 14%, 18% { transform: rotate(-6deg); }
+  12%, 16%, 20% { transform: rotate(6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fare, .fare::before, .fareIconWrap, .fareIconWrap::before, .fareIcon { animation: none; }
+}
 
 .fareTitle { font-size: 1.15rem; font-weight: 500; color: white; margin: 0 0 2px; }
 
@@ -65,11 +97,101 @@
 
 .fareDesc { font-size: 0.92rem; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 1.25rem; max-width: 640px; }
 
-.fareSms { background: rgba(0,0,0,0.2); border: 1px solid rgba(204,119,0,0.2); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; max-width: 440px; }
+.fareSms {
+  background: linear-gradient(180deg, rgba(220,38,38,0.14) 0%, rgba(20,5,5,0.6) 100%);
+  border: 1px solid rgba(239,68,68,0.4);
+  border-left: 3px solid #ef4444;
+  border-radius: 12px;
+  padding: 1rem 1.25rem 1.1rem;
+  margin-bottom: 1.25rem;
+  max-width: 480px;
+  box-shadow: 0 8px 24px rgba(220,38,38,0.12), inset 0 0 0 1px rgba(239,68,68,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.fareSms::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(239,68,68,0.6), transparent);
+  animation: fareScan 3.5s ease-in-out infinite;
+}
+@keyframes fareScan {
+  0%, 70%, 100% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  25% { transform: translateX(100%); opacity: 0; }
+}
 
-.fareSmsHeader { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #cc7700; margin-bottom: 0.4rem; font-weight: 600; }
+.fareSmsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #ef4444;
+  margin-bottom: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.fareSmsLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  color: #ef4444;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.fareSmsLiveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239,68,68,0.8);
+  animation: fareLiveDot 1.2s ease-in-out infinite;
+}
+@keyframes fareLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.fareSmsTime {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
 
-.fareSmsBody { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0; }
+.fareSmsBody {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 400;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: -0.01em;
+  min-height: 3.6em;
+}
+.fareSmsCursor {
+  display: inline-block;
+  color: #ef4444;
+  margin-left: 1px;
+  animation: fareCursorBlink 0.9s steps(2) infinite;
+  font-weight: 400;
+}
+@keyframes fareCursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fareSms::after, .fareSmsLiveDot, .fareSmsCursor { animation: none; }
+}
 
 .fareTags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
 

@@ -59,6 +59,8 @@ export default function Footer() {
         <span className={styles.bottomDot}>·</span>
         <a href="/personvern">Personvern</a>
         <span className={styles.bottomDot}>·</span>
+        <a href="/kjopsvilkar">Kjøpsvilkår</a>
+        <span className={styles.bottomDot}>·</span>
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">met.no CC BY 4.0</a>
       </div>
     </footer>

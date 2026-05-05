@@ -31,3 +31,68 @@ body {
 @keyframes bv-sail  { 0%,100%{transform:translateX(0) translateY(0)} 33%{transform:translateX(12px) translateY(-3px)} 66%{transform:translateX(-8px) translateY(-1px)} }
 @keyframes bv-wv1   { from{transform:translateX(0)} to{transform:translateX(-160px)} }
 @keyframes bv-wv2   { from{transform:translateX(0)} to{transform:translateX(140px)} }
+
+
+/* ===== Compass Shape Divider ===== */
+/* Stort dekorativt kompass som overlapper to seksjoner.
+   Toppen sitter mot ForWho (lys grå-blå),
+   bunnen mot Pricing (mørkeblå #0a2a3d). */
+.compass-divider {
+  position: relative;
+  /* Gir luft over og under — pusterom mellom seksjonene */
+  height: clamp(80px, 10vw, 140px);
+  pointer-events: none;
+  overflow: visible;
+  background: linear-gradient(
+    to bottom,
+    #f4f8fb 0%,
+    #f4f8fb 50%,
+    #0a2a3d 50%,
+    #0a2a3d 100%
+  );
+}
+.compass-divider__top,
+.compass-divider__bottom { display: none; } /* Ikke i bruk lenger */
+.compass-divider__svg {
+  position: absolute;
+  top: 50%;
+  right: clamp(2rem, 8vw, 6rem);
+  /* Sentrert vertikalt på skille-linjen */
+  transform: translateY(-50%);
+  width: clamp(140px, 18vw, 220px);
+  height: clamp(140px, 18vw, 220px);
+  z-index: 1;
+  filter: drop-shadow(0 8px 24px rgba(10,42,61,0.12));
+  animation: compassRotate 80s ease-in-out infinite;
+}
+@keyframes compassRotate {
+  /* Subtil rotasjon — ±2° for å gi liv uten å distrahere */
+  0%, 100% { transform: translateY(-50%) rotate(-2deg); }
+  50% { transform: translateY(-50%) rotate(2deg); }
+}
+
+/* Tablet og mobil: mindre, og litt mer kompakt seksjonshøyde */
+@media (max-width: 768px) {
+  .compass-divider {
+    height: 100px;
+  }
+  .compass-divider__svg {
+    width: 130px;
+    height: 130px;
+    right: 1.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .compass-divider {
+    height: 80px;
+  }
+  .compass-divider__svg {
+    width: 100px;
+    height: 100px;
+    right: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compass-divider__svg { animation: none; transform: translateY(-50%); }
+}

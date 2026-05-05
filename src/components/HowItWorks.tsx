@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import styles from './HowItWorks.module.css'
+import FarevarslMelding from './FarevarslMelding'
 
 const steps = [
   {
@@ -98,7 +99,7 @@ export default function HowItWorks() {
         <div className={styles.fare}>
           <div className={styles.fareLeft}>
             <div className={styles.fareIconWrap}>
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <svg className={styles.fareIcon} width="32" height="32" viewBox="0 0 32 32" fill="none">
                 <path d="M16 3L29.5 27H2.5L16 3z" stroke="#cc7700" strokeWidth="2" strokeLinejoin="round" fill="rgba(204,119,0,0.08)"/>
                 <path d="M16 11V20" stroke="#cc7700" strokeWidth="2.2" strokeLinecap="round"/>
                 <circle cx="16" cy="24" r="1.4" fill="#cc7700"/>
@@ -110,13 +111,7 @@ export default function HowItWorks() {
             </div>
           </div>
           <p className={styles.fareDesc}>Dersom sjøforholdene blir farlige sender vi umiddelbart varsler til alle mottakere — uansett tidspunkt. Kuling, ekstremvær, sterk strøm. Sikkerhet går foran alt.</p>
-          <div className={styles.fareSms}>
-            <div className={styles.fareSmsHeader}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L11.5 11H0.5L6 1z" stroke="#cc7700" strokeWidth="1.1" fill="none" strokeLinejoin="round"/><path d="M6 4.5V7.5" stroke="#cc7700" strokeWidth="1.1" strokeLinecap="round"/><circle cx="6" cy="9.5" r="0.6" fill="#cc7700"/></svg>
-              <strong>Farevarsel · Tånes</strong>
-            </div>
-            <p className={styles.fareSmsBody}>Kuling varslet fra kl. 14:00 — 20+ m/s fra NV. Unngå sjøen frem til i morgen tidlig.</p>
-          </div>
+          <FarevarslMelding />
           <div className={styles.fareTags}>
             {['Kuling', 'Ekstremvær', 'Sterk strøm', 'Sendes umiddelbart', 'Alle mottakere'].map(t => (
               <span key={t} className={styles.fareTag}>{t}</span>

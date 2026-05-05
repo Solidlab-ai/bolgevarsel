@@ -147,17 +147,6 @@ export default function ForWho() {
             <div className={styles.imgOverlay} />
           </div>
           <div className={styles.cardContent}>
-            <div className={styles.dekor}>
-              <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.dekorSvg}>
-                {/* Anker */}
-                <circle cx="60" cy="28" r="10" stroke="currentColor" strokeWidth="3" fill="none"/>
-                <line x1="60" y1="38" x2="60" y2="92" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-                <line x1="38" y1="58" x2="82" y2="58" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-                <path d="M38 58 C38 75 48 88 60 92 C72 88 82 75 82 58" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-                {/* Bølger under */}
-                <path d="M20 105 Q30 100 40 105 Q50 110 60 105 Q70 100 80 105 Q90 110 100 105" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.5"/>
-              </svg>
-            </div>
             <span className={styles.tagLabel}>{p.tag}</span>
             <h3 className={styles.cardTitle}>{p.tittel}</h3>
             <p className={styles.cardText}>{p.beskrivelse}</p>

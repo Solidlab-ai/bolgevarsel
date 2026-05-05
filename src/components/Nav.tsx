@@ -9,7 +9,6 @@ const links = [
   { href: '#pris', label: 'Priser' },
   { href: '/varsel', label: 'Sjekk bølger' },
   { href: '/sjokamera', label: 'Sjøkamera' },
-  { href: '/dashboard', label: 'Dashboard' },
   { href: '/hjelp', label: 'Hjelp' },
 ]
 

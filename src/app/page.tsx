@@ -48,21 +48,52 @@ export default function Home() {
       <Hero />
       <HowItWorks />
       <ForWho />
-      <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem 0',background:'#f4f8fb'}}>
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{opacity:0.18}}>
-          <circle cx="32" cy="32" r="30" stroke="#0a2a3d" strokeWidth="2"/>
-          <circle cx="32" cy="32" r="22" stroke="#0a2a3d" strokeWidth="1"/>
-          <line x1="32" y1="2" x2="32" y2="10" stroke="#0a2a3d" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="32" y1="54" x2="32" y2="62" stroke="#0a2a3d" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="2" y1="32" x2="10" y2="32" stroke="#0a2a3d" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="54" y1="32" x2="62" y2="32" stroke="#0a2a3d" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="9.5" y1="9.5" x2="14.5" y2="14.5" stroke="#0a2a3d" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="49.5" y1="49.5" x2="54.5" y2="54.5" stroke="#0a2a3d" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="54.5" y1="9.5" x2="49.5" y2="14.5" stroke="#0a2a3d" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="9.5" y1="54.5" x2="14.5" y2="49.5" stroke="#0a2a3d" strokeWidth="1" strokeLinecap="round"/>
-          <polygon points="32,10 35,32 32,28 29,32" fill="#1a6080"/>
-          <polygon points="32,54 35,32 32,36 29,32" fill="#0a2a3d" opacity="0.4"/>
-          <circle cx="32" cy="32" r="2.5" fill="#0a2a3d"/>
+      <div className="compass-divider" aria-hidden="true">
+        <div className="compass-divider__top" />
+        <div className="compass-divider__bottom" />
+        <svg className="compass-divider__svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="compassClipTop"><rect x="0" y="0" width="64" height="32" /></clipPath>
+            <clipPath id="compassClipBottom"><rect x="0" y="32" width="64" height="32" /></clipPath>
+            <g id="compassMark">
+              <circle cx="32" cy="32" r="30" strokeWidth="0.6" fill="none"/>
+              <circle cx="32" cy="32" r="22" strokeWidth="0.3" fill="none"/>
+              <circle cx="32" cy="32" r="14" strokeWidth="0.2" fill="none"/>
+              <line x1="32" y1="2" x2="32" y2="10" strokeWidth="0.6" strokeLinecap="round"/>
+              <line x1="32" y1="54" x2="32" y2="62" strokeWidth="0.6" strokeLinecap="round"/>
+              <line x1="2" y1="32" x2="10" y2="32" strokeWidth="0.6" strokeLinecap="round"/>
+              <line x1="54" y1="32" x2="62" y2="32" strokeWidth="0.6" strokeLinecap="round"/>
+              <line x1="9.5" y1="9.5" x2="14.5" y2="14.5" strokeWidth="0.3" strokeLinecap="round"/>
+              <line x1="49.5" y1="49.5" x2="54.5" y2="54.5" strokeWidth="0.3" strokeLinecap="round"/>
+              <line x1="54.5" y1="9.5" x2="49.5" y2="14.5" strokeWidth="0.3" strokeLinecap="round"/>
+              <line x1="9.5" y1="54.5" x2="14.5" y2="49.5" strokeWidth="0.3" strokeLinecap="round"/>
+              <text x="32" y="7" textAnchor="middle" fontSize="3.2" fontFamily="'DM Sans',sans-serif" fontWeight="600" letterSpacing="0.1">N</text>
+              <text x="32" y="61" textAnchor="middle" fontSize="2.4" fontFamily="'DM Sans',sans-serif" fontWeight="500" letterSpacing="0.1">S</text>
+              <text x="60.5" y="33.4" textAnchor="middle" fontSize="2.4" fontFamily="'DM Sans',sans-serif" fontWeight="500">Ø</text>
+              <text x="3.5" y="33.4" textAnchor="middle" fontSize="2.4" fontFamily="'DM Sans',sans-serif" fontWeight="500">V</text>
+            </g>
+            <g id="compassNeedle">
+              <polygon points="32,8 34.5,32 32,29 29.5,32"/>
+              <polygon points="32,56 34.5,32 32,35 29.5,32" opacity="0.45"/>
+              <circle cx="32" cy="32" r="1.6"/>
+            </g>
+          </defs>
+
+          {/* Mørk versjon — synlig i øvre (lyse) halvdel */}
+          <g clipPath="url(#compassClipTop)" stroke="#0a2a3d" fill="#0a2a3d">
+            <use href="#compassMark" />
+          </g>
+          <g clipPath="url(#compassClipTop)" stroke="#dc2626" fill="#dc2626">
+            <use href="#compassNeedle" />
+          </g>
+
+          {/* Lys versjon — synlig i nedre (mørke) halvdel */}
+          <g clipPath="url(#compassClipBottom)" stroke="rgba(255,255,255,0.55)" fill="rgba(255,255,255,0.55)">
+            <use href="#compassMark" />
+          </g>
+          <g clipPath="url(#compassClipBottom)" stroke="#ef4444" fill="#ef4444">
+            <use href="#compassNeedle" />
+          </g>
         </svg>
       </div>
       <Pricing />

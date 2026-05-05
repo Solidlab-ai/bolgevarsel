@@ -10,11 +10,11 @@ interface SosCountdownModalProps {
 }
 
 /**
- * Fullskjerm-modal med 5-sek countdown for SOS-utløsning.
+ * Fullskjerm-modal med 10-sek countdown for SOS-utløsning.
  * Triggeres typisk via ?sos=trigger i URL.
  *
  * Flow:
- *  - Vises åpen → 5 sek countdown starter automatisk
+ *  - Vises åpen → 10 sek countdown starter automatisk
  *  - Bruker kan trykke "Send NÅ" for å hoppe over countdown
  *  - Bruker kan trykke "Avbryt" eller ESC for å avbryte
  *  - Når countdown når 0 → henter GPS + caller emergency-sos API
@@ -25,7 +25,7 @@ export default function SosCountdownModal({
   fallbackLocation,
   onClose,
 }: SosCountdownModalProps) {
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(10)
   const [phase, setPhase] = useState<'counting' | 'sending' | 'sent' | 'error'>('counting')
   const [result, setResult] = useState<{ contacts_notified: number; location?: string } | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
@@ -34,7 +34,7 @@ export default function SosCountdownModal({
   // Reset state når modalen åpnes
   useEffect(() => {
     if (open) {
-      setCountdown(5)
+      setCountdown(10)
       setPhase('counting')
       setResult(null)
       setErrorMsg('')
@@ -278,7 +278,7 @@ export default function SosCountdownModal({
             </p>
             <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
               <button
-                onClick={() => { sentRef.current = false; setCountdown(5); setPhase('counting') }}
+                onClick={() => { sentRef.current = false; setCountdown(10); setPhase('counting') }}
                 style={{
                   flex: 1, background: '#dc2626', color: 'white',
                   padding: '12px 16px', borderRadius: 999,

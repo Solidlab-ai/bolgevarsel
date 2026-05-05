@@ -1,10 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 export interface BvSelectOption {
   value: string
   label: string
+  /** Valgfri gruppe-tag. Når satt, vises grupperings-headere over disse alternativene. */
+  group?: string
 }
 
 interface BvSelectProps {
@@ -94,11 +96,21 @@ export default function BvSelect({
     return () => { document.body.style.overflow = prev }
   }, [open, isMobile])
 
-  // Sett highlight til valgt når åpnes
+  // Sett highlight til valgt når åpnes + scroll til valgt
   useEffect(() => {
     if (open) {
       const idx = options.findIndex((o) => o.value === value)
       setHighlightedIndex(idx)
+
+      // Scroll til valgt option (etter at DOM har rendret)
+      if (idx >= 0) {
+        setTimeout(() => {
+          const selectedEl = document.querySelector('[role="listbox"] [aria-selected="true"]')
+          if (selectedEl) {
+            selectedEl.scrollIntoView({ block: 'center', behavior: 'auto' })
+          }
+        }, 0)
+      }
     }
   }, [open, value, options])
 
@@ -242,39 +254,56 @@ export default function BvSelect({
               {/* Tom div for å sentrere tittelen via space-between */}
               <div style={{ width: 60 }} aria-hidden="true" />
             </div>
-            {options.map((opt) => {
+            {options.map((opt, idx) => {
               const isSelected = opt.value === value
+              const prevGroup = idx > 0 ? options[idx - 1].group : undefined
+              const showGroupHeader = opt.group && opt.group !== prevGroup
               return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => handleSelect(opt)}
-                  role="option"
-                  aria-selected={isSelected}
-                  style={{
-                    width: '100%',
-                    padding: '14px 20px',
-                    background: isSelected ? '#e8f4f8' : 'white',
-                    color: isSelected ? '#1a6080' : '#0a2a3d',
-                    border: 'none',
-                    fontSize: 15,
-                    fontWeight: isSelected ? 500 : 400,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid rgba(10,42,61,0.04)',
-                  }}
-                >
-                  {opt.label}
-                  {isSelected && (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8l3.5 3.5L13 5" stroke="#1a6080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                <React.Fragment key={opt.value}>
+                  {showGroupHeader && (
+                    <div style={{
+                      padding: '14px 20px 6px',
+                      fontSize: 11,
+                      color: '#6b8fa3',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      fontWeight: 500,
+                      background: '#f8fbfc',
+                      borderBottom: '1px solid rgba(10,42,61,0.04)',
+                    }}>
+                      {opt.group}
+                    </div>
                   )}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(opt)}
+                    role="option"
+                    aria-selected={isSelected}
+                    style={{
+                      width: '100%',
+                      padding: '14px 20px',
+                      background: isSelected ? '#e8f4f8' : 'white',
+                      color: isSelected ? '#1a6080' : '#0a2a3d',
+                      border: 'none',
+                      fontSize: 15,
+                      fontWeight: isSelected ? 500 : 400,
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderBottom: '1px solid rgba(10,42,61,0.04)',
+                    }}
+                  >
+                    {opt.label}
+                    {isSelected && (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8l3.5 3.5L13 5" stroke="#1a6080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                </React.Fragment>
               )
             })}
           </div>
@@ -296,7 +325,7 @@ export default function BvSelect({
             border: '1px solid rgba(10,42,61,0.1)',
             boxShadow: '0 8px 24px rgba(10,42,61,0.12), 0 2px 4px rgba(10,42,61,0.04)',
             zIndex: 1000,
-            maxHeight: 300,
+            maxHeight: 420,
             overflowY: 'auto',
             animation: 'bvSelectFadeIn 0.15s ease',
           }}
@@ -304,37 +333,54 @@ export default function BvSelect({
           {options.map((opt, idx) => {
             const isSelected = opt.value === value
             const isHighlighted = idx === highlightedIndex
+            const prevGroup = idx > 0 ? options[idx - 1].group : undefined
+            const showGroupHeader = opt.group && opt.group !== prevGroup
             return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => handleSelect(opt)}
-                onMouseEnter={() => setHighlightedIndex(idx)}
-                role="option"
-                aria-selected={isSelected}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  background: isHighlighted ? '#f0f8fc' : isSelected ? '#e8f4f8' : 'white',
-                  color: isSelected ? '#1a6080' : '#0a2a3d',
-                  border: 'none',
-                  fontSize: 14,
-                  fontWeight: isSelected ? 500 : 400,
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                {opt.label}
-                {isSelected && (
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8l3.5 3.5L13 5" stroke="#1a6080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+              <React.Fragment key={opt.value}>
+                {showGroupHeader && (
+                  <div style={{
+                    padding: '8px 12px 4px',
+                    fontSize: 10,
+                    color: '#6b8fa3',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    fontWeight: 500,
+                    background: '#f8fbfc',
+                    borderBottom: '1px solid rgba(10,42,61,0.04)',
+                  }}>
+                    {opt.group}
+                  </div>
                 )}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(opt)}
+                  onMouseEnter={() => setHighlightedIndex(idx)}
+                  role="option"
+                  aria-selected={isSelected}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    background: isHighlighted ? '#f0f8fc' : isSelected ? '#e8f4f8' : 'white',
+                    color: isSelected ? '#1a6080' : '#0a2a3d',
+                    border: 'none',
+                    fontSize: 14,
+                    fontWeight: isSelected ? 500 : 400,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {opt.label}
+                  {isSelected && (
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8l3.5 3.5L13 5" stroke="#1a6080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </button>
+              </React.Fragment>
             )
           })}
         </div>

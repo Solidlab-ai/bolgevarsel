@@ -56,6 +56,62 @@ function BrandIllustration() {
 
 type Sub = { id:string; email:string; plan:string; status:string; send_time?:string }
 type Loc = { id:string; name:string; lat:number; lon:number }
+
+// Tids-options grupperte etter tid på døgnet for raskere navigering
+const SEND_TIME_OPTIONS = [
+  // Morgen: 06:00 - 11:30
+  { value: '06:00', label: '06:00', group: 'Morgen' },
+  { value: '06:30', label: '06:30', group: 'Morgen' },
+  { value: '07:00', label: '07:00', group: 'Morgen' },
+  { value: '07:30', label: '07:30', group: 'Morgen' },
+  { value: '08:00', label: '08:00', group: 'Morgen' },
+  { value: '08:30', label: '08:30', group: 'Morgen' },
+  { value: '09:00', label: '09:00', group: 'Morgen' },
+  { value: '09:30', label: '09:30', group: 'Morgen' },
+  { value: '10:00', label: '10:00', group: 'Morgen' },
+  { value: '10:30', label: '10:30', group: 'Morgen' },
+  { value: '11:00', label: '11:00', group: 'Morgen' },
+  { value: '11:30', label: '11:30', group: 'Morgen' },
+  // Dag: 12:00 - 17:30
+  { value: '12:00', label: '12:00', group: 'Dag' },
+  { value: '12:30', label: '12:30', group: 'Dag' },
+  { value: '13:00', label: '13:00', group: 'Dag' },
+  { value: '13:30', label: '13:30', group: 'Dag' },
+  { value: '14:00', label: '14:00', group: 'Dag' },
+  { value: '14:30', label: '14:30', group: 'Dag' },
+  { value: '15:00', label: '15:00', group: 'Dag' },
+  { value: '15:30', label: '15:30', group: 'Dag' },
+  { value: '16:00', label: '16:00', group: 'Dag' },
+  { value: '16:30', label: '16:30', group: 'Dag' },
+  { value: '17:00', label: '17:00', group: 'Dag' },
+  { value: '17:30', label: '17:30', group: 'Dag' },
+  // Kveld: 18:00 - 23:30
+  { value: '18:00', label: '18:00', group: 'Kveld' },
+  { value: '18:30', label: '18:30', group: 'Kveld' },
+  { value: '19:00', label: '19:00', group: 'Kveld' },
+  { value: '19:30', label: '19:30', group: 'Kveld' },
+  { value: '20:00', label: '20:00', group: 'Kveld' },
+  { value: '20:30', label: '20:30', group: 'Kveld' },
+  { value: '21:00', label: '21:00', group: 'Kveld' },
+  { value: '21:30', label: '21:30', group: 'Kveld' },
+  { value: '22:00', label: '22:00', group: 'Kveld' },
+  { value: '22:30', label: '22:30', group: 'Kveld' },
+  { value: '23:00', label: '23:00', group: 'Kveld' },
+  { value: '23:30', label: '23:30', group: 'Kveld' },
+  // Natt: 00:00 - 05:30
+  { value: '00:00', label: '00:00', group: 'Natt' },
+  { value: '00:30', label: '00:30', group: 'Natt' },
+  { value: '01:00', label: '01:00', group: 'Natt' },
+  { value: '01:30', label: '01:30', group: 'Natt' },
+  { value: '02:00', label: '02:00', group: 'Natt' },
+  { value: '02:30', label: '02:30', group: 'Natt' },
+  { value: '03:00', label: '03:00', group: 'Natt' },
+  { value: '03:30', label: '03:30', group: 'Natt' },
+  { value: '04:00', label: '04:00', group: 'Natt' },
+  { value: '04:30', label: '04:30', group: 'Natt' },
+  { value: '05:00', label: '05:00', group: 'Natt' },
+  { value: '05:30', label: '05:30', group: 'Natt' },
+]
 type Rec = { id:string; location_id:string; phone:string; name:string; email?:string; active:boolean; sms_enabled:boolean; sms_daily:boolean; send_time?:string; profile?:string }
 type EmergencyContact = { id:string; name:string; phone:string; relation?:string; active:boolean; created_at:string }
 
@@ -937,7 +993,7 @@ export default function MinSideClient() {
                         ariaLabel="Leveringstidspunkt"
                         options={[
                           { value: '', label: `Samme som abonnementet (${sendTime})` },
-                          ...['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t => ({ value: t, label: t }))
+                          ...SEND_TIME_OPTIONS
                         ]}
                       />
                       <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>Gjelder både SMS og e-post. Overstyrer abonnementets standard — nyttig for skift- og nattarbeidere.</div>
@@ -1245,7 +1301,7 @@ export default function MinSideClient() {
                     <BvSelect
                       value={sendTime}
                       onChange={setSendTime}
-                      options={['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t => ({ value: t, label: t }))}
+                      options={SEND_TIME_OPTIONS}
                       ariaLabel="Leveringstidspunkt"
                     />
                   </div>

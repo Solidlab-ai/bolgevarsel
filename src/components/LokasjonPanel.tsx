@@ -15,7 +15,7 @@ type HourlyPoint = {
   wind: number; windDir: number; temp: number; symbol: string
 }
 
-const SCORE_COLORS = ['#94a3b8','#16a34a','#65a30d','#ca8a04','#ea580c','#dc2626']
+const SCORE_COLORS = ['#16a34a','#16a34a','#65a30d','#ca8a04','#ea580c','#dc2626']
 const SCORE_LABELS = ['Rolig hav','Stille hav','Lett krusning','Moderat','Kuling','Farevarsel']
 
 function ratingScore(wave: number, wind: number) {
@@ -360,21 +360,21 @@ export default function LokasjonPanel({
         return (
           <div key={loc.id} style={S.card}>
             <div style={S.row(isActive)} onClick={() => toggle(i)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
                 <div style={{ width: 30, height: 30, borderRadius: 8, background: '#e8f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1C4.8 1 3 2.8 3 5C3 7.8 7 13 7 13C7 13 11 7.8 11 5C11 2.8 9.2 1 7 1Z" stroke="#1a6080" strokeWidth="1.2" fill="none"/><circle cx="7" cy="5" r="1.3" fill="#1a6080"/></svg>
                 </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#0a2a3d' }}>{loc.name}</div>
-                  <div style={{ fontSize: 11, color: '#6b8fa3' }}>{loc.lat.toFixed(4)}°N · {loc.lon.toFixed(4)}°E</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#0a2a3d', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loc.name}</div>
+                  <div style={{ fontSize: 11, color: '#6b8fa3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loc.lat.toFixed(4)}°N · {loc.lon.toFixed(4)}°E</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-                  <span style={{ fontSize: 12, fontWeight: 500, color }}>{label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, fontWeight: 500, color, whiteSpace: 'nowrap' }}>{label}</span>
                 </div>
-                <svg style={{ color: '#94a3b8', transform: (onLocationClick ? 'none' : (isActive ? 'rotate(90deg)' : 'none')), transition: 'transform 0.2s' }} width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg style={{ color: '#94a3b8', transform: (onLocationClick ? 'none' : (isActive ? 'rotate(90deg)' : 'none')), transition: 'transform 0.2s', flexShrink: 0 }} width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
             </div>
 

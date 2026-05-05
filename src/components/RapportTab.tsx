@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import BvSelect from './BvSelect'
+import BvSheet from './BvSheet'
 
 type Loc = { id: string; name: string; lat: number; lon: number }
 
@@ -309,17 +310,6 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [flerdagOppsummering, setFlerdagOppsummering] = useState<string | null>(null)
-
-  // Auto-scroll: når rapport blir generert på mobil, scroll til toppen av resultatet
-  const resultRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (rapport && resultRef.current && window.innerWidth < 800) {
-      // Liten delay så DOM rekker å oppdatere
-      setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
-    }
-  }, [rapport])
   const [flerdagLoading, setFlerdagLoading] = useState(false)
 
   const selectedLoc = locs.find(l => l.id === locId)
@@ -374,19 +364,9 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
   }
 
   return (
-    <div className="bv-rapport-wrap">
-      <style>{`
-        .bv-rapport-wrap { display: flex; flex-direction: column; gap: 0; }
-        .bv-rapport-config { order: 1; }
-        .bv-rapport-result { order: 2; }
-        @media (max-width: 799px) {
-          /* På mobil: rapport over, konfig under (resultatet er det viktigste) */
-          .bv-rapport-config { order: 2; margin-top: 12px; }
-          .bv-rapport-result { order: 1; }
-        }
-      `}</style>
+    <div>
       {/* Konfigurasjon */}
-      <div className="bv-rapport-config" style={{ background: '#f8fbfc', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
+      <div style={{ background: '#f8fbfc', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="9" rx="1.5" stroke="#1a6080" strokeWidth="1.2" fill="none"/><path d="M1 5.5h12" stroke="#1a6080" strokeWidth="1.2"/><path d="M4.5 1v2M9.5 1v2" stroke="#1a6080" strokeWidth="1.2" strokeLinecap="round"/></svg>
           <span style={{ fontSize: 15, fontWeight: 500, color: '#0a2a3d' }}>Generer rapport</span>
@@ -425,31 +405,38 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
         </button>
       </div>
 
-      {/* Rapport */}
-      {rapport && (
-        <div className="bv-rapport-result" ref={resultRef}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ fontSize: 13, color: '#6b8fa3', flex: '1 1 auto', minWidth: 0 }}>{selectedLoc?.name} · {PROFILER.find(p => p.value === profile)?.label || 'Standard'}</div>
-            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-              <button style={{ ...S.btnG, whiteSpace: 'nowrap' }} onClick={printRapport}>
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 4.5V2h7v2.5M2 4.5h9a1 1 0 0 1 1 1v4H10v2H3v-2H1v-4a1 1 0 0 1 1-1z" stroke="currentColor" strokeWidth="1.1" fill="none"/></svg>
-                Last ned PDF
-              </button>
-              <button style={{ ...S.btnG, opacity: sendingEmail ? 0.6 : 1, color: emailSent ? '#16a34a' : '#0a2a3d', whiteSpace: 'nowrap' }} onClick={sendEmail} disabled={sendingEmail}>
-                {emailSent ? (
-                  <>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3.5 3.5L11 4" stroke="#16a34a" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    Sendt!
-                  </>
-                ) : (
-                  <>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2h11l-5 5L1 2z" stroke="currentColor" strokeWidth="1.1" fill="none"/><path d="M1 2v7.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V2" stroke="currentColor" strokeWidth="1.1" fill="none"/></svg>
-                    Send til e-post
-                  </>
-                )}
-              </button>
-            </div>
+      {/* Rapport - vises i BvSheet */}
+      <BvSheet
+        open={!!rapport}
+        onClose={() => setRapport(null)}
+        title={selectedLoc?.name || 'Rapport'}
+        footer={
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button style={{ ...S.btnG, flex: 1, justifyContent: 'center', whiteSpace: 'nowrap' }} onClick={printRapport}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 4.5V2h7v2.5M2 4.5h9a1 1 0 0 1 1 1v4H10v2H3v-2H1v-4a1 1 0 0 1 1-1z" stroke="currentColor" strokeWidth="1.1" fill="none"/></svg>
+              PDF
+            </button>
+            <button style={{ ...S.btnG, flex: 1, justifyContent: 'center', opacity: sendingEmail ? 0.6 : 1, color: emailSent ? '#16a34a' : '#0a2a3d', whiteSpace: 'nowrap' }} onClick={sendEmail} disabled={sendingEmail}>
+              {emailSent ? (
+                <>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3.5 3.5L11 4" stroke="#16a34a" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Sendt!
+                </>
+              ) : (
+                <>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 2h11l-5 5L1 2z" stroke="currentColor" strokeWidth="1.1" fill="none"/><path d="M1 2v7.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V2" stroke="currentColor" strokeWidth="1.1" fill="none"/></svg>
+                  E-post
+                </>
+              )}
+            </button>
           </div>
+        }
+      >
+        {rapport && (
+          <div>
+            <div style={{ fontSize: 13, color: '#6b8fa3', marginBottom: 12, textAlign: 'center' }}>
+              {PROFILER.find(p => p.value === profile)?.label || 'Standard'}
+            </div>
           {/* Flerdag-oppsummering */}
           {parseInt(days) > 1 && (flerdagLoading || flerdagOppsummering) && (
             <div style={{ background: '#f0f8fc', border: '1px solid rgba(26,96,128,0.15)', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
@@ -474,11 +461,9 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
             </div>
           )}
           {rapport.map((day, i) => <DayCard key={i} day={day} profile={profile} />)}
-          <button style={{ ...S.btnG, width: '100%', justifyContent: 'center', marginTop: 4 }} onClick={() => setRapport(null)}>
-            Ny rapport
-          </button>
-        </div>
-      )}
+          </div>
+        )}
+      </BvSheet>
 
       {locs.length === 0 && (
         <p style={{ color: '#6b8fa3', fontSize: 14, textAlign: 'center', padding: '1rem 0' }}>

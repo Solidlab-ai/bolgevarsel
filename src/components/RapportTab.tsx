@@ -1,5 +1,6 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import BvSelect from './BvSelect'
 
 type Loc = { id: string; name: string; lat: number; lon: number }
 
@@ -308,6 +309,17 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [flerdagOppsummering, setFlerdagOppsummering] = useState<string | null>(null)
+
+  // Auto-scroll: når rapport blir generert på mobil, scroll til toppen av resultatet
+  const resultRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (rapport && resultRef.current && window.innerWidth < 800) {
+      // Liten delay så DOM rekker å oppdatere
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [rapport])
   const [flerdagLoading, setFlerdagLoading] = useState(false)
 
   const selectedLoc = locs.find(l => l.id === locId)
@@ -362,9 +374,19 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
   }
 
   return (
-    <div>
+    <div className="bv-rapport-wrap">
+      <style>{`
+        .bv-rapport-wrap { display: flex; flex-direction: column; gap: 0; }
+        .bv-rapport-config { order: 1; }
+        .bv-rapport-result { order: 2; }
+        @media (max-width: 799px) {
+          /* På mobil: rapport over, konfig under (resultatet er det viktigste) */
+          .bv-rapport-config { order: 2; margin-top: 12px; }
+          .bv-rapport-result { order: 1; }
+        }
+      `}</style>
       {/* Konfigurasjon */}
-      <div style={{ background: '#f8fbfc', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
+      <div className="bv-rapport-config" style={{ background: '#f8fbfc', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="9" rx="1.5" stroke="#1a6080" strokeWidth="1.2" fill="none"/><path d="M1 5.5h12" stroke="#1a6080" strokeWidth="1.2"/><path d="M4.5 1v2M9.5 1v2" stroke="#1a6080" strokeWidth="1.2" strokeLinecap="round"/></svg>
           <span style={{ fontSize: 15, fontWeight: 500, color: '#0a2a3d' }}>Generer rapport</span>
@@ -372,22 +394,31 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8, marginBottom: 8 }}>
           <div>
             <div style={{ fontSize: 12, color: '#6b8fa3', marginBottom: 4 }}>Lokasjon</div>
-            <select style={S.inp} value={locId} onChange={e => setLocId(e.target.value)}>
-              {locs.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-            </select>
+            <BvSelect
+              value={locId}
+              onChange={setLocId}
+              options={locs.map(l => ({ value: l.id, label: l.name }))}
+              ariaLabel="Lokasjon"
+            />
           </div>
           <div>
             <div style={{ fontSize: 12, color: '#6b8fa3', marginBottom: 4 }}>Periode</div>
-            <select style={S.inp} value={days} onChange={e => setDays(e.target.value)}>
-              {PERIODER.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-            </select>
+            <BvSelect
+              value={days}
+              onChange={setDays}
+              options={PERIODER}
+              ariaLabel="Periode"
+            />
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 12, color: '#6b8fa3', marginBottom: 4 }}>Aktivitetsprofil</div>
-          <select style={S.inp} value={profile} onChange={e => setProfile(e.target.value)}>
-            {PROFILER.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
+          <BvSelect
+            value={profile}
+            onChange={setProfile}
+            options={PROFILER}
+            ariaLabel="Aktivitetsprofil"
+          />
         </div>
         <button style={{ ...S.btnP, width: '100%', opacity: loading ? 0.6 : 1 }} onClick={generer} disabled={loading || !selectedLoc}>
           {loading ? 'Henter data...' : 'Generer rapport'}
@@ -396,15 +427,15 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
 
       {/* Rapport */}
       {rapport && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 13, color: '#6b8fa3' }}>{selectedLoc?.name} · {PROFILER.find(p => p.value === profile)?.label || 'Standard'}</div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button style={S.btnG} onClick={printRapport}>
+        <div className="bv-rapport-result" ref={resultRef}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ fontSize: 13, color: '#6b8fa3', flex: '1 1 auto', minWidth: 0 }}>{selectedLoc?.name} · {PROFILER.find(p => p.value === profile)?.label || 'Standard'}</div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button style={{ ...S.btnG, whiteSpace: 'nowrap' }} onClick={printRapport}>
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 4.5V2h7v2.5M2 4.5h9a1 1 0 0 1 1 1v4H10v2H3v-2H1v-4a1 1 0 0 1 1-1z" stroke="currentColor" strokeWidth="1.1" fill="none"/></svg>
                 Last ned PDF
               </button>
-              <button style={{ ...S.btnG, opacity: sendingEmail ? 0.6 : 1, color: emailSent ? '#16a34a' : '#0a2a3d' }} onClick={sendEmail} disabled={sendingEmail}>
+              <button style={{ ...S.btnG, opacity: sendingEmail ? 0.6 : 1, color: emailSent ? '#16a34a' : '#0a2a3d', whiteSpace: 'nowrap' }} onClick={sendEmail} disabled={sendingEmail}>
                 {emailSent ? (
                   <>
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3.5 3.5L11 4" stroke="#16a34a" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>

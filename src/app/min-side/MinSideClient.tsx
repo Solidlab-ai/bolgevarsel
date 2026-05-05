@@ -3,6 +3,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import LokasjonPanel from '@/components/LokasjonPanel'
 import LeggTilLokasjon from '@/components/LeggTilLokasjon'
 import RapportTab from '@/components/RapportTab'
+import SosButton from '@/components/SosButton'
+import SosCountdownModal from '@/components/SosCountdownModal'
+import BvSelect from '@/components/BvSelect'
+import BvSheet from '@/components/BvSheet'
 
 const S = {
   page: { minHeight:'100vh', background:'#e8f4f8', fontFamily:'DM Sans, sans-serif' } as React.CSSProperties,
@@ -63,6 +67,11 @@ export default function MinSideClient() {
   const [sendTimeSaved, setSendTimeSaved] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showAddLoc, setShowAddLoc] = useState(false)
+  const [selectedLoc, setSelectedLoc] = useState<Loc | null>(null)
+  const [selectedLocWeather, setSelectedLocWeather] = useState<any | null>(null)
+  const [selectedLocSummary, setSelectedLocSummary] = useState<string | null>(null)
+  const [selectedLocScoreColor, setSelectedLocScoreColor] = useState<string>('#94a3b8')
+  const [selectedLocScoreLabel, setSelectedLocScoreLabel] = useState<string>('Laster...')
   const [activeTab, setActiveTab] = useState<'lokasjoner'|'mottakere'|'rapport'|'konto'|'nodkontakt'>('lokasjoner')
   const [accountLoading, setAccountLoading] = useState<string|null>(null)
   const [showAddRec, setShowAddRec] = useState(false)
@@ -93,6 +102,40 @@ export default function MinSideClient() {
   const [view, setView] = useState<'login'|'dash'>('login')
   const [magicSendt, setMagicSendt] = useState(false)
   const [feil, setFeil] = useState('')
+  const [sosCountdownOpen, setSosCountdownOpen] = useState(false)
+
+  // URL-flagg-håndtering: ?dev_login=... og ?sos=trigger
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+
+    // Dev-login: sett localStorage (kun lokalt)
+    const devEmail = params.get('dev_login')
+    if (devEmail && process.env.NODE_ENV !== 'production') {
+      localStorage.setItem('bv_email', devEmail)
+    }
+
+    // SOS-trigger: åpne countdown-modal + sett tab til Nodkontakt
+    if (params.get('sos') === 'trigger') {
+      setActiveTab('nodkontakt')
+      setSosCountdownOpen(true)
+    }
+
+    // Rens URL hvis vi gjorde noe
+    if (devEmail || params.get('sos')) {
+      window.history.replaceState({}, '', '/min-side')
+    }
+  }, [])
+
+  // Lytt på SOS-trigger event fra SosButton når vi allerede er på /min-side
+  useEffect(() => {
+    const handler = () => {
+      setActiveTab('nodkontakt')
+      setSosCountdownOpen(true)
+    }
+    window.addEventListener('bv-sos-trigger', handler)
+    return () => window.removeEventListener('bv-sos-trigger', handler)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -343,17 +386,20 @@ export default function MinSideClient() {
     <div style={S.page}>
       <div style={{background:'#c8e8f5', overflow:'hidden', position:'relative'}}>
         <div style={{padding:'1.1rem 2rem', display:'flex', alignItems:'center', justifyContent:'space-between', maxWidth:1100, margin:'0 auto', position:'relative', zIndex:2}}>
-          <a href="/" style={{textDecoration:'none',display:'flex',alignItems:'center'}}>
+          <a href="/min-side" onClick={(e)=>{e.preventDefault();setActiveTab('lokasjoner');window.scrollTo({top:0,behavior:'smooth'})}} style={{textDecoration:'none',display:'flex',alignItems:'center',cursor:'pointer'}} aria-label="Til hovedoversikt">
             <svg width="220" height="36" viewBox="0 0 280 44" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4 22 Q10 14 16 22 Q22 30 28 22 Q34 14 40 22" stroke="#0a2a3d" strokeWidth="3" strokeLinecap="round" fill="none"/>
               <path d="M6 31 Q11 26 16 31 Q21 36 26 31 Q31 26 36 31" stroke="#1a6080" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.5"/>
               <text x="52" y="30" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fontSize="23" fontWeight="600" fill="#0a2a3d" letterSpacing="-0.8">bølgevarsel<tspan fill="#1a6080" fontWeight="400">.no</tspan></text>
             </svg>
           </a>
-          <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
-            <span style={{...S.badge(sub!.plan)}}>{planLabel[sub!.plan]}</span>
-            <button onClick={async()=>{await fetch('/api/auth/logout',{method:'POST'});localStorage.removeItem('bv_email');setView('login');setSub(null)}}
-              style={{background:'transparent',border:'1px solid rgba(10,42,61,0.2)',color:'rgba(10,42,61,0.5)',cursor:'pointer',fontSize:'0.85rem',padding:'7px 18px',borderRadius:100,fontFamily:'inherit'}}>Logg ut</button>
+          <div className="bv-header-actions" style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+            <SosButton variant="header-inline" />
+            <div className="bv-header-secondary" style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+              <span style={{...S.badge(sub!.plan)}}>{planLabel[sub!.plan]}</span>
+              <button onClick={async()=>{await fetch('/api/auth/logout',{method:'POST'});localStorage.removeItem('bv_email');localStorage.removeItem('bv_plan');localStorage.removeItem('bv_plan_cached_at');setView('login');setSub(null)}}
+                style={{background:'transparent',border:'1px solid rgba(10,42,61,0.2)',color:'rgba(10,42,61,0.5)',cursor:'pointer',fontSize:'0.85rem',padding:'7px 18px',borderRadius:100,fontFamily:'inherit'}}>Logg ut</button>
+            </div>
           </div>
         </div>
         <svg viewBox="0 0 1440 180" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',display:'block',marginTop:'-6px'}}>
@@ -390,16 +436,36 @@ export default function MinSideClient() {
         </svg>
       </div>
 
-      <div style={S.wrap}>
+      <div className="bv-wrap" style={S.wrap}>
         <style>{`
           @media (min-width: 800px) {
             .bv-dashboard { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start; }
             .bv-sidebar { position: sticky; top: 80px; }
+            /* Inline rapport vises kun på mobil - skjul på desktop (har egen Rapport-tab) */
+            .bv-mobile-rapport { display: none !important; }
           }
           @media (max-width: 799px) {
-            .bv-dashboard { display: block; }
-            .bv-sidebar { margin-bottom: 1rem; }
+            /* Mobile: tab-content øverst, sidebar (profil/plan + hurtigvalg) under */
+            .bv-dashboard { display: flex !important; flex-direction: column; gap: 1rem; }
+            .bv-sidebar { order: 2; margin-bottom: 0; }
+            .bv-tab-content { order: 1; }
+            /* Smalere padding på mobil så innholdet får plass */
+            .bv-wrap { padding: 1.2rem 0.9rem !important; }
+            /* Tab-bar skjules på mobil - hurtigvalg i sidebar håndterer navigasjon */
+            .bv-tabbar { display: none !important; }
+            .bv-tab-content { padding: 1.2rem !important; }
+            /* Plan-badge + logg-ut skjules på mobil - vises i sidebar/Konto-tab. SOS forblir synlig. */
+            .bv-header-secondary { display: none !important; }
+            /* Hurtigvalg: skjul Lokasjoner (default-tab) og Rapport (inline) */
+            .bv-quicknav-btn[data-key="lokasjoner"],
+            .bv-quicknav-btn[data-key="rapport"] { display: none !important; }
+            /* Mottakere-header: knapper full bredde under tekst */
+            .bv-mottakere-actions { width: 100% !important; }
+            .bv-mottakere-actions button { flex: 1 1 0 !important; justify-content: center !important; }
+            /* CSV-import er en desktop-feature - skjul på mobil */
+            .bv-csv-only-desktop { display: none !important; }
           }
+          .bv-tabbar::-webkit-scrollbar { display: none; }
         `}</style>
 
         <div className="bv-dashboard">
@@ -492,6 +558,8 @@ export default function MinSideClient() {
               <div style={{fontSize:11,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Hurtigvalg</div>
               {tabs.map(tab => (
                 <button key={tab.key} onClick={()=>setActiveTab(tab.key as any)}
+                  className="bv-quicknav-btn"
+                  data-key={tab.key}
                   style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'9px 10px',borderRadius:8,
                     background:activeTab===tab.key?'#e8f4f8':'transparent',border:'none',cursor:'pointer',
                     color:activeTab===tab.key?'#1a6080':'#6b8fa3',fontSize:14,fontWeight:activeTab===tab.key?500:400,
@@ -537,16 +605,18 @@ export default function MinSideClient() {
           </div>
 
           {/* Hoveddel: Tab-innhold */}
-          <div style={S.card as React.CSSProperties}>
+          <div className="bv-tab-content" style={S.card as React.CSSProperties}>
           {/* Tab-bar */}
-          <div style={{display:'flex',borderBottom:'1px solid rgba(10,42,61,0.07)',marginBottom:'1.2rem',gap:0}}>
+          <div className="bv-tabbar" style={{display:'flex',borderBottom:'1px solid rgba(10,42,61,0.07)',marginBottom:'1.2rem',gap:0,overflowX:'auto',scrollbarWidth:'none',msOverflowStyle:'none'}}>
             {tabs.map(tab => (
               <button key={tab.key} onClick={()=>setActiveTab(tab.key as any)}
-                style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,padding:'10px 8px',
+                className="bv-tab"
+                data-active={activeTab===tab.key}
+                style={{flex:'1 1 0',display:'flex',alignItems:'center',justifyContent:'center',gap:6,padding:'10px 8px',
                   background:'none',border:'none',cursor:'pointer',fontSize:'13px',fontWeight:500,
                   color:activeTab===tab.key?'#1a6080':'#6b8fa3',
                   borderBottom:activeTab===tab.key?'2px solid #1a6080':'2px solid transparent',
-                  transition:'all 0.15s',fontFamily:'inherit',
+                  transition:'all 0.15s',fontFamily:'inherit',whiteSpace:'nowrap',
                 }}>
                 {tab.icon}
                 {tab.label}
@@ -562,25 +632,33 @@ export default function MinSideClient() {
           {/* ===== TAB: LOKASJONER ===== */}
           {activeTab === 'lokasjoner' && (
             <div>
-              {locs.length === 0 && <p style={{color:'#6b8fa3',fontSize:'0.9rem',marginBottom:'1rem'}}>Ingen lokasjoner ennå.</p>}
-              {locs.length > 0 && <LokasjonPanel locations={locs} />}
-              <div style={{display:'flex',flexDirection:'column',gap:'0.5rem',marginBottom:locs.length?'1rem':0}}>
-                {locs.map(loc => (
-                  <div key={loc.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0.7rem 0.9rem',background:'#f8fbfc',borderRadius:10}}>
-                    <div>
-                      <div style={{fontWeight:500,color:'#0a2a3d',fontSize:'0.9rem'}}>{loc.name}</div>
-                      <div style={{fontSize:'0.72rem',color:'#6b8fa3',marginTop:'1px'}}>{loc.lat.toFixed(4)}°N · {recs.filter(r=>r.location_id===loc.id).length} mottaker(e)</div>
-                    </div>
-                    <button style={S.btnDanger} onClick={()=>deleteLoc(loc.id)}>
-                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M5 3.5l.5 7h3l.5-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </button>
-                  </div>
-                ))}
+              <div style={{marginBottom:'1.2rem'}}>
+                <h2 style={{fontFamily:"'Fraunces', Georgia, serif",fontSize:'1.25rem',fontWeight:400,color:'#0a2a3d',margin:'0 0 4px'}}>Lokasjoner</h2>
+                <p style={{fontSize:'0.88rem',color:'#6b8fa3',lineHeight:1.5,margin:0}}>
+                  Velg hvilke steder du vil hente sjødata fra.
+                </p>
               </div>
-              <button style={{...S.btnPrimary,width:'100%',padding:'0.8rem'}} onClick={()=>setShowAddLoc(true)}>
+              {locs.length === 0 && <p style={{color:'#6b8fa3',fontSize:'0.85rem',marginBottom:'1rem',fontStyle:'italic'}}>Ingen lokasjoner lagt til enda. Trykk «+ Legg til lokasjon» nedenfor.</p>}
+              {locs.length > 0 && (
+                <LokasjonPanel
+                  locations={locs}
+                  onLocationClick={(payload) => {
+                    setSelectedLoc(payload.location)
+                    setSelectedLocWeather(payload.weather)
+                    setSelectedLocSummary(payload.summary)
+                    setSelectedLocScoreColor(payload.scoreColor)
+                    setSelectedLocScoreLabel(payload.scoreLabel)
+                  }}
+                />
+              )}
+              <button style={{...S.btnPrimary,width:'100%',padding:'0.8rem',marginTop:locs.length?'0.5rem':0}} onClick={()=>setShowAddLoc(true)}>
                 + Legg til lokasjon
               </button>
-              {showAddLoc && (
+              <BvSheet
+                open={showAddLoc}
+                onClose={() => setShowAddLoc(false)}
+                title="Ny lokasjon"
+              >
                 <LeggTilLokasjon
                   onAdd={async (loc) => {
                     const r = await fetch('/api/min-side/location', { method:'POST', headers:{'Content-Type':'application/json'},
@@ -591,28 +669,49 @@ export default function MinSideClient() {
                   }}
                   onCancel={() => setShowAddLoc(false)}
                 />
-              )}
+              </BvSheet>
+            </div>
+          )}
+
+          {/* Mobil-bonus: Rapport vises også inline under Lokasjoner-tab */}
+          {activeTab === 'lokasjoner' && locs.length > 0 && (
+            <div className="bv-mobile-rapport" style={{marginTop:'1.5rem',paddingTop:'1.5rem',borderTop:'1px solid rgba(10,42,61,0.07)'}}>
+              <RapportTab locs={locs} subEmail={sub!.email} />
             </div>
           )}
 
           {/* ===== TAB: MOTTAKERE ===== */}
           {activeTab === 'mottakere' && (
             <div>
-              <div style={{display:'flex',justifyContent:'flex-end',gap:'8px',marginBottom:'1rem'}}>
-                {locs.length > 0 && <>
-                  <button style={{...S.btnGhost,fontSize:'0.85rem',padding:'7px 13px',display:'flex',alignItems:'center',gap:'5px'}} onClick={()=>{setShowCsvImport(!showCsvImport);setShowAddRec(false)}}>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M1 10h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" opacity="0.5"/></svg>
-                    Importer CSV
-                  </button>
-                  <button style={{...S.btnPrimary,fontSize:'0.85rem',padding:'7px 13px',display:'flex',alignItems:'center',gap:'5px'}} onClick={()=>{setShowAddRec(!showAddRec);setShowCsvImport(false)}}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                    Legg til
-                  </button>
-                </>}
+              <button onClick={()=>{setActiveTab('lokasjoner');window.scrollTo({top:0,behavior:'smooth'})}} style={{display:'inline-flex',alignItems:'center',gap:6,background:'none',border:'none',color:'#6b8fa3',fontSize:13,cursor:'pointer',padding:'4px 0',marginBottom:'1rem',fontFamily:'inherit'}}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3 6l4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Tilbake til oversikt
+              </button>
+
+              {/* Intro-tekst + handlingsknapper */}
+              <div className="bv-mottakere-header" style={{display:'flex',alignItems:'flex-start',gap:'1rem',marginBottom:'1.2rem',flexWrap:'wrap'}}>
+                <div style={{flex:'1 1 240px',minWidth:0}}>
+                  <h2 style={{fontFamily:"'Fraunces', Georgia, serif",fontSize:'1.25rem',fontWeight:400,color:'#0a2a3d',margin:'0 0 4px'}}>Mottakere</h2>
+                  <p style={{fontSize:'0.88rem',color:'#6b8fa3',lineHeight:1.5,margin:0}}>
+                    Her legger du inn hvem som skal få tilsendt daglig sjørapport fra Bølgevarsel — på SMS, e-post eller begge.
+                  </p>
+                </div>
+                {locs.length > 0 && (
+                  <div className="bv-mottakere-actions" style={{display:'flex',gap:'8px',flexShrink:0}}>
+                    <button className="bv-csv-only-desktop" style={{...S.btnGhost,fontSize:'0.85rem',padding:'7px 13px',display:'flex',alignItems:'center',gap:'5px'}} onClick={()=>{setShowCsvImport(!showCsvImport);setShowAddRec(false)}}>
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M1 10h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" opacity="0.5"/></svg>
+                      Importer CSV
+                    </button>
+                    <button style={{...S.btnPrimary,fontSize:'0.85rem',padding:'7px 13px',display:'flex',alignItems:'center',gap:'5px'}} onClick={()=>{setShowAddRec(!showAddRec);setShowCsvImport(false)}}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                      Legg til
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {recs.length === 0 && !showAddRec && !showCsvImport && (
-                <p style={{color:'#6b8fa3',fontSize:'0.9rem',marginBottom:'1rem'}}>Ingen mottakere ennå. Bruk knappene over for å legge til.</p>
+              {recs.length === 0 && !showAddRec && !showCsvImport && locs.length > 0 && (
+                <p style={{color:'#6b8fa3',fontSize:'0.85rem',marginBottom:'1rem',fontStyle:'italic'}}>Ingen mottakere lagt til enda.</p>
               )}
               {locs.length === 0 && <p style={{color:'#6b8fa3',fontSize:'0.85rem'}}>Legg til en lokasjon i «Lokasjoner»-fanen først.</p>}
 
@@ -647,18 +746,23 @@ export default function MinSideClient() {
                                   </div>
                                   <div>
                                     <div style={{fontSize:11,color:'#6b8fa3',marginBottom:3}}>Aktivitetsprofil</div>
-                                    <select style={{...S.inp}} value={editProfile} onChange={e=>setEditProfile(e.target.value)}>
-                                      <option value="">Generell sjørapport</option>
-                                      <option value="surfer">Surfer</option>
-                                      <option value="kitesurfer">Kitesurfer</option>
-                                      <option value="windsurfer">Windsurfer</option>
-                                      <option value="fisker">Fisker</option>
-                                      <option value="familie">Barn/ungdom med båt</option>
-                                      <option value="baatforer">Båtfører</option>
-                                      <option value="kajakk">Padler / kajakk</option>
-                                      <option value="seiler">Seiler</option>
-                                      <option value="fridykker">Fridykker / snorkling</option>
-                                    </select>
+                                    <BvSelect
+                                      value={editProfile}
+                                      onChange={setEditProfile}
+                                      ariaLabel="Aktivitetsprofil"
+                                      options={[
+                                        { value: '', label: 'Generell sjørapport' },
+                                        { value: 'surfer', label: 'Surfer' },
+                                        { value: 'kitesurfer', label: 'Kitesurfer' },
+                                        { value: 'windsurfer', label: 'Windsurfer' },
+                                        { value: 'fisker', label: 'Fisker' },
+                                        { value: 'familie', label: 'Barn/ungdom med båt' },
+                                        { value: 'baatforer', label: 'Båtfører' },
+                                        { value: 'kajakk', label: 'Padler / kajakk' },
+                                        { value: 'seiler', label: 'Seiler' },
+                                        { value: 'fridykker', label: 'Fridykker / snorkling' },
+                                      ]}
+                                    />
                                   </div>
                                 </div>
                                 <div style={{display:'flex',gap:'8px'}}>
@@ -717,8 +821,26 @@ export default function MinSideClient() {
                 </div>
               )}
 
-              {showAddRec && locs.length > 0 && (
-                <form onSubmit={addRec} style={{display:'flex',flexDirection:'column',gap:'0.75rem',marginBottom:'1rem'}}>
+              {locs.length > 0 && (
+                <BvSheet
+                  open={showAddRec}
+                  onClose={() => setShowAddRec(false)}
+                  title="Ny mottaker"
+                  footer={
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        // Trigger form submit via vanlig path
+                        const form = document.getElementById('bv-add-rec-form') as HTMLFormElement | null
+                        if (form) form.requestSubmit()
+                      }}
+                      style={{...S.btnPrimary, width:'100%', padding:'12px 16px'}}
+                    >
+                      + Legg til mottaker
+                    </button>
+                  }
+                >
+                <form id="bv-add-rec-form" onSubmit={addRec} style={{display:'flex',flexDirection:'column',gap:'0.75rem'}}>
 
                   {/* ── Seksjon 1: Mottakerinformasjon ── */}
                   <div style={{fontSize:11,fontWeight:500,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.06em',display:'flex',alignItems:'center',gap:6}}>
@@ -738,10 +860,13 @@ export default function MinSideClient() {
                     </div>
                     <div style={{padding:'10px 12px',borderTop:'0.5px solid rgba(10,42,61,0.07)'}}>
                       <div style={{fontSize:11,color:'#6b8fa3',marginBottom:3}}>Lokasjon</div>
-                      <select style={{...S.inp,borderRadius:6}} value={newLocId} onChange={e=>setNewLocId(e.target.value)} required>
-                        <option value="">Velg lokasjon</option>
-                        {locs.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}
-                      </select>
+                      <BvSelect
+                        value={newLocId}
+                        onChange={setNewLocId}
+                        ariaLabel="Lokasjon"
+                        placeholder="Velg lokasjon"
+                        options={locs.map(l => ({ value: l.id, label: l.name }))}
+                      />
                     </div>
                   </div>
 
@@ -806,38 +931,43 @@ export default function MinSideClient() {
                     {/* Leveringstidspunkt e-post */}
                     <div style={{padding:'10px 12px',borderBottom:'0.5px solid rgba(10,42,61,0.07)'}}>
                       <div style={{fontSize:11,color:'#6b8fa3',marginBottom:3}}>Leveringstidspunkt for e-post</div>
-                      <select style={{...S.inp,borderRadius:6}} value={newSendTime} onChange={e=>setNewSendTime(e.target.value)}>
-                        <option value="">Samme som abonnementet ({sendTime})</option>
-                        {['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t=>(
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
+                      <BvSelect
+                        value={newSendTime}
+                        onChange={setNewSendTime}
+                        ariaLabel="Leveringstidspunkt"
+                        options={[
+                          { value: '', label: `Samme som abonnementet (${sendTime})` },
+                          ...['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t => ({ value: t, label: t }))
+                        ]}
+                      />
                       <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>Gjelder både SMS og e-post. Overstyrer abonnementets standard — nyttig for skift- og nattarbeidere.</div>
                     </div>
                     {/* Aktivitetsprofil */}
                     <div style={{padding:'10px 12px'}}>
                       <div style={{fontSize:11,color:'#6b8fa3',marginBottom:3}}>Aktivitetsprofil</div>
-                      <select style={{...S.inp,borderRadius:6}} value={newProfile} onChange={e=>setNewProfile(e.target.value)}>
-                        <option value="">Generell sjørapport (ingen spesialprofil)</option>
-                        <option value="surfer">Surfer</option>
-                        <option value="kitesurfer">Kitesurfer</option>
-                        <option value="windsurfer">Windsurfer</option>
-                        <option value="fisker">Fisker</option>
-                        <option value="familie">Barn/ungdom med båt</option>
-                        <option value="baatforer">Båtfører</option>
-                        <option value="kajakk">Padler / kajakk</option>
-                        <option value="seiler">Seiler</option>
-                        <option value="fridykker">Fridykker / snorkling</option>
-                      </select>
+                      <BvSelect
+                        value={newProfile}
+                        onChange={setNewProfile}
+                        ariaLabel="Aktivitetsprofil"
+                        options={[
+                          { value: '', label: 'Generell sjørapport (ingen spesialprofil)' },
+                          { value: 'surfer', label: 'Surfer' },
+                          { value: 'kitesurfer', label: 'Kitesurfer' },
+                          { value: 'windsurfer', label: 'Windsurfer' },
+                          { value: 'fisker', label: 'Fisker' },
+                          { value: 'familie', label: 'Barn/ungdom med båt' },
+                          { value: 'baatforer', label: 'Båtfører' },
+                          { value: 'kajakk', label: 'Padler / kajakk' },
+                          { value: 'seiler', label: 'Seiler' },
+                          { value: 'fridykker', label: 'Fridykker / snorkling' },
+                        ]}
+                      />
                       <div style={{fontSize:10,color:'#94a3b8',marginTop:3}}>Tilpasser både SMS og e-postrapporten til aktiviteten.</div>
                     </div>
                   </div>
 
-                  <div style={{display:'flex',gap:'8px'}}>
-                    <button style={{...S.btnPrimary,flex:1}} type="submit">+ Legg til mottaker</button>
-                    <button style={S.btnGhost} type="button" onClick={()=>setShowAddRec(false)}>Avbryt</button>
-                  </div>
                 </form>
+                </BvSheet>
               )}
 
               {showCsvImport && locs.length > 0 && (
@@ -845,10 +975,13 @@ export default function MinSideClient() {
                   <div style={{fontSize:'0.9rem',fontWeight:500,color:'#0a2a3d',marginBottom:'0.75rem'}}>Importer fra CSV</div>
                   <div style={{marginBottom:'0.75rem'}}>
                     <div style={{fontSize:'11px',color:'#6b8fa3',marginBottom:3}}>Velg lokasjon for alle importerte mottakere</div>
-                    <select style={S.inp} value={newLocId} onChange={e=>setNewLocId(e.target.value)}>
-                      <option value="">Velg lokasjon</option>
-                      {locs.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}
-                    </select>
+                    <BvSelect
+                      value={newLocId}
+                      onChange={setNewLocId}
+                      ariaLabel="Lokasjon"
+                      placeholder="Velg lokasjon"
+                      options={locs.map(l => ({ value: l.id, label: l.name }))}
+                    />
                   </div>
                   <label style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px',border:'1px dashed rgba(10,42,61,0.2)',borderRadius:10,padding:'1.5rem',cursor:'pointer',background:'white',textAlign:'center'}}>
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 4v16M8 14l6 6 6-6" stroke="#1a6080" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M4 22h20" stroke="#1a6080" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>
@@ -886,6 +1019,10 @@ export default function MinSideClient() {
           {/* ===== TAB: NØDKONTAKT ===== */}
           {activeTab === 'nodkontakt' && sub?.plan === 'sikkerhet' && (
             <div>
+              <button onClick={()=>{setActiveTab('lokasjoner');window.scrollTo({top:0,behavior:'smooth'})}} style={{display:'inline-flex',alignItems:'center',gap:6,background:'none',border:'none',color:'#6b8fa3',fontSize:13,cursor:'pointer',padding:'4px 0',marginBottom:'1rem',fontFamily:'inherit'}}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3 6l4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Tilbake til oversikt
+              </button>
               {/* SOS-knapp */}
               <div style={{background:'linear-gradient(135deg, #fef2f2, #fff1f2)',border:'1px solid #fecaca',borderRadius:16,padding:'1.5rem',marginBottom:'1.2rem',textAlign:'center'}}>
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{marginBottom:8}}>
@@ -984,30 +1121,15 @@ export default function MinSideClient() {
 
               {/* Legg til kontakt */}
               {emergencyContacts.length < 3 && (
-                !showAddEmergency ? (
+                <>
                   <button onClick={()=>setShowAddEmergency(true)} style={{...S.btnPrimary,width:'100%',textAlign:'center'}}>
                     + Legg til nodkontakt
                   </button>
-                ) : (
-                  <div style={{background:'#f8fbfc',borderRadius:12,padding:'1rem',border:'1px solid rgba(10,42,61,0.07)'}}>
-                    <div style={{fontSize:13,fontWeight:500,color:'#0a2a3d',marginBottom:10}}>Ny nodkontakt</div>
-                    {ecError && <div style={{background:'#fef2f2',color:'#ef4444',padding:'6px 10px',borderRadius:8,fontSize:12,marginBottom:8}}>{ecError}</div>}
-                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      <input placeholder="Navn" value={ecName} onChange={e=>setEcName(e.target.value)}
-                        style={{...S.inp,padding:'0.65rem 1rem'}}/>
-                      <input placeholder="+47XXXXXXXX" value={ecPhone} onChange={e=>setEcPhone(e.target.value)}
-                        style={{...S.inp,padding:'0.65rem 1rem'}}/>
-                      <select value={ecRelation} onChange={e=>setEcRelation(e.target.value)}
-                        style={{...S.inp,padding:'0.65rem 1rem',cursor:'pointer'}}>
-                        <option value="">Relasjon (valgfritt)</option>
-                        <option value="familie">Familie</option>
-                        <option value="venn">Venn</option>
-                        <option value="kollega">Kollega</option>
-                        <option value="partner">Partner</option>
-                        <option value="nabo">Nabo</option>
-                      </select>
-                    </div>
-                    <div style={{display:'flex',gap:8,marginTop:10}}>
+                  <BvSheet
+                    open={showAddEmergency}
+                    onClose={() => { setShowAddEmergency(false); setEcError('') }}
+                    title="Ny nødkontakt"
+                    footer={
                       <button onClick={async()=>{
                         setEcSaving(true); setEcError('')
                         const res = await fetch('/api/min-side/emergency-contacts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:ecName,phone:ecPhone,relation:ecRelation||undefined})})
@@ -1018,13 +1140,43 @@ export default function MinSideClient() {
                           setEcName(''); setEcPhone(''); setEcRelation(''); setShowAddEmergency(false)
                         } else setEcError(d.error||'Noe gikk galt')
                       }} disabled={ecSaving||!ecName||!ecPhone}
-                        style={{...S.btnPrimary,opacity:(!ecName||!ecPhone)?0.5:1}}>
+                        style={{...S.btnPrimary,width:'100%',padding:'12px 16px',opacity:(!ecName||!ecPhone)?0.5:1}}>
                         {ecSaving?'Lagrer...':'Legg til'}
                       </button>
-                      <button onClick={()=>{setShowAddEmergency(false);setEcError('')}} style={S.btnGhost}>Avbryt</button>
+                    }
+                  >
+                    {ecError && <div style={{background:'#fef2f2',color:'#ef4444',padding:'8px 12px',borderRadius:8,fontSize:13,marginBottom:12}}>{ecError}</div>}
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                      <div>
+                        <div style={{fontSize:11,color:'#6b8fa3',marginBottom:4}}>Navn</div>
+                        <input placeholder="Navn" value={ecName} onChange={e=>setEcName(e.target.value)}
+                          style={{...S.inp,padding:'0.65rem 1rem'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,color:'#6b8fa3',marginBottom:4}}>Telefonnummer</div>
+                        <input placeholder="+47XXXXXXXX" value={ecPhone} onChange={e=>setEcPhone(e.target.value)}
+                          style={{...S.inp,padding:'0.65rem 1rem'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,color:'#6b8fa3',marginBottom:4}}>Relasjon (valgfritt)</div>
+                        <BvSelect
+                          value={ecRelation}
+                          onChange={setEcRelation}
+                          ariaLabel="Relasjon"
+                          placeholder="Velg relasjon"
+                          options={[
+                            { value: '', label: 'Ingen' },
+                            { value: 'familie', label: 'Familie' },
+                            { value: 'venn', label: 'Venn' },
+                            { value: 'kollega', label: 'Kollega' },
+                            { value: 'partner', label: 'Partner' },
+                            { value: 'nabo', label: 'Nabo' },
+                          ]}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )
+                  </BvSheet>
+                </>
               )}
 
               {/* Info-boks */}
@@ -1042,12 +1194,22 @@ export default function MinSideClient() {
 
           {/* ===== TAB: RAPPORT ===== */}
           {activeTab === 'rapport' && (
-            <RapportTab locs={locs} subEmail={sub!.email} />
+            <div>
+              <button onClick={()=>{setActiveTab('lokasjoner');window.scrollTo({top:0,behavior:'smooth'})}} style={{display:'inline-flex',alignItems:'center',gap:6,background:'none',border:'none',color:'#6b8fa3',fontSize:13,cursor:'pointer',padding:'4px 0',marginBottom:'1rem',fontFamily:'inherit'}}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3 6l4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Tilbake til oversikt
+              </button>
+              <RapportTab locs={locs} subEmail={sub!.email} />
+            </div>
           )}
 
           {/* ===== TAB: KONTO ===== */}
           {activeTab === 'konto' && (
             <div style={{display:'flex',flexDirection:'column',gap:'0.6rem'}}>
+              <button onClick={()=>{setActiveTab('lokasjoner');window.scrollTo({top:0,behavior:'smooth'})}} style={{alignSelf:'flex-start',display:'inline-flex',alignItems:'center',gap:6,background:'none',border:'none',color:'#6b8fa3',fontSize:13,cursor:'pointer',padding:'4px 0',marginBottom:'0.5rem',fontFamily:'inherit'}}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3 6l4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Tilbake til oversikt
+              </button>
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'2px'}}>E-postadresse</div>
                 <div style={{fontWeight:500,color:'#0a2a3d'}}>{sub!.email}</div>
@@ -1079,12 +1241,14 @@ export default function MinSideClient() {
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'8px'}}>Leveringstidspunkt for daglig rapport</div>
                 <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
-                  <select value={sendTime} onChange={e=>setSendTime(e.target.value)}
-                    style={{padding:'0.4rem 0.7rem',borderRadius:8,border:'1.5px solid rgba(10,42,61,0.12)',background:'white',fontSize:'0.9rem',color:'#0a2a3d',cursor:'pointer'}}>
-                    {['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t=>(
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                  <div style={{flex:'1 1 auto',maxWidth:160}}>
+                    <BvSelect
+                      value={sendTime}
+                      onChange={setSendTime}
+                      options={['04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00'].map(t => ({ value: t, label: t }))}
+                      ariaLabel="Leveringstidspunkt"
+                    />
+                  </div>
                   <button onClick={async()=>{setSendTimeSaving(true);setSendTimeSaved(false);await fetch('/api/min-side/send-time',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscriber_id:sub!.id,send_time:sendTime})});setSendTimeSaving(false);setSendTimeSaved(true);setTimeout(()=>setSendTimeSaved(false),2500)}}
                     style={{padding:'0.4rem 1rem',borderRadius:8,background:'#0a2a3d',color:'white',border:'none',cursor:'pointer',fontSize:'0.85rem',fontWeight:500}}>
                     {sendTimeSaving?'Lagrer...':sendTimeSaved?'Lagret!':'Lagre'}
@@ -1120,6 +1284,123 @@ export default function MinSideClient() {
         <div style={{textAlign:'center',padding:'1rem 0'}}>
         </div>
       </div>
+
+      {/* SOS countdown-modal - åpnes via ?sos=trigger eller header SOS-knapp */}
+      <SosCountdownModal
+        open={sosCountdownOpen}
+        emergencyContactCount={emergencyContacts.length}
+        fallbackLocation={locs[0] ? { name: locs[0].name, lat: locs[0].lat, lon: locs[0].lon } : null}
+        onClose={() => setSosCountdownOpen(false)}
+      />
+
+      {/* Lokasjons-detalj sheet */}
+      <BvSheet
+        open={!!selectedLoc}
+        onClose={() => setSelectedLoc(null)}
+        title={selectedLoc?.name || 'Lokasjon'}
+      >
+        {selectedLoc && (() => {
+          const recCount = recs.filter(r=>r.location_id===selectedLoc.id).length
+          const locRecs = recs.filter(r=>r.location_id===selectedLoc.id)
+          const wd = selectedLocWeather
+          return (
+            <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+              {/* Status-pille */}
+              <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#f8fbfc',borderRadius:100,alignSelf:'flex-start'}}>
+                <div style={{width:9,height:9,borderRadius:'50%',background:selectedLocScoreColor}}/>
+                <span style={{fontSize:13,fontWeight:500,color:selectedLocScoreColor}}>{selectedLocScoreLabel}</span>
+              </div>
+
+              {/* AI-oppsummering */}
+              {selectedLocSummary && (
+                <p style={{margin:0,fontSize:13.5,color:'#334155',lineHeight:1.65,background:'#f8fafc',borderRadius:8,padding:'12px 14px',borderLeft:`3px solid ${selectedLocScoreColor}`}}>
+                  {selectedLocSummary}
+                </p>
+              )}
+
+              {/* Live sjødata stats */}
+              {wd ? (
+                <div style={{display:'grid',gridTemplateColumns:'repeat(3, minmax(0, 1fr))',gap:8}}>
+                  <div style={{background:'#f8fbfc',borderRadius:8,padding:'10px',textAlign:'center'}}>
+                    <div style={{fontSize:10,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:3}}>Bølger</div>
+                    <div style={{fontSize:22,fontWeight:300,color:'#0a2a3d',lineHeight:1}}>{wd.avgWave.toFixed(1)}<span style={{fontSize:12,color:'#6b8fa3'}}>m</span></div>
+                    <div style={{fontSize:11,color:'#6b8fa3',marginTop:2}}>maks {wd.maxWave.toFixed(1)}m</div>
+                  </div>
+                  <div style={{background:'#f8fbfc',borderRadius:8,padding:'10px',textAlign:'center'}}>
+                    <div style={{fontSize:10,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:3}}>Vind</div>
+                    <div style={{fontSize:22,fontWeight:300,color:'#0a2a3d',lineHeight:1}}>{wd.windNow.toFixed(1)}<span style={{fontSize:12,color:'#6b8fa3'}}>m/s</span></div>
+                    <div style={{fontSize:11,color:'#6b8fa3',marginTop:2}}>maks {wd.windMax.toFixed(1)}</div>
+                  </div>
+                  <div style={{background:'#f8fbfc',borderRadius:8,padding:'10px',textAlign:'center'}}>
+                    <div style={{fontSize:10,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:3}}>Luft / sjø</div>
+                    <div style={{fontSize:22,fontWeight:300,color:'#0a2a3d',lineHeight:1}}>{Math.round(wd.temp)}<span style={{fontSize:12,color:'#6b8fa3'}}>°</span></div>
+                    <div style={{fontSize:11,color:'#6b8fa3',marginTop:2}}>{wd.seaTemp !== null ? `sjø ${wd.seaTemp.toFixed(1)}°` : '—'}</div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{background:'#f8fbfc',borderRadius:8,padding:'1rem',textAlign:'center',fontSize:13,color:'#6b8fa3'}}>
+                  Henter sjødata...
+                </div>
+              )}
+
+              {/* Posisjon */}
+              <div style={{background:'#f8fbfc',borderRadius:12,padding:'12px 14px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{fontSize:10,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:3}}>Posisjon</div>
+                  <div style={{fontSize:13,color:'#0a2a3d',fontFamily:'monospace'}}>
+                    {selectedLoc.lat.toFixed(4)}°N · {selectedLoc.lon.toFixed(4)}°E
+                  </div>
+                </div>
+                <a href={`https://www.google.com/maps?q=${selectedLoc.lat},${selectedLoc.lon}`} target="_blank" rel="noopener noreferrer"
+                  style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:12,color:'#1a6080',textDecoration:'none',padding:'6px 10px',background:'white',borderRadius:6,border:'1px solid rgba(10,42,61,0.1)'}}>
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6c0-2.2 1.8-4 4-4s4 1.8 4 4c0 3-4 5-4 5S2 9 2 6z" stroke="currentColor" strokeWidth="1.2" fill="none"/><circle cx="6" cy="6" r="1.3" fill="currentColor"/></svg>
+                  Maps
+                </a>
+              </div>
+
+              {/* Mottakere på denne lokasjonen */}
+              <div style={{background:'#f8fbfc',borderRadius:12,padding:'14px 16px'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                  <div style={{fontSize:11,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.06em'}}>Mottakere på denne lokasjonen</div>
+                  <span style={{fontSize:12,fontWeight:500,color:'#1a6080',background:'#e8f4f8',padding:'2px 8px',borderRadius:100}}>{recCount}</span>
+                </div>
+                {recCount === 0 ? (
+                  <p style={{fontSize:13,color:'#6b8fa3',fontStyle:'italic',margin:'4px 0 8px'}}>Ingen mottakere lagt til for denne lokasjonen ennå.</p>
+                ) : (
+                  <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                    {locRecs.map(r => (
+                      <div key={r.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0'}}>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'#e8f4f8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:500,color:'#1a6080',flexShrink:0}}>
+                          {(r.name||r.phone).slice(0,2).toUpperCase()}
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:13,color:'#0a2a3d',fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.name||'Uten navn'}</div>
+                          <div style={{fontSize:11,color:'#6b8fa3'}}>{r.phone}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={()=>{setSelectedLoc(null);setActiveTab('mottakere');setShowAddRec(true)}}
+                  style={{...S.btnGhost,width:'100%',marginTop:10,fontSize:13,padding:'8px 12px'}}>
+                  + Legg til mottaker for denne lokasjonen
+                </button>
+              </div>
+
+              {/* Slett-knapp */}
+              <button onClick={()=>{
+                if (confirm(`Slett "${selectedLoc.name}"? Alle mottakere knyttet til denne lokasjonen blir også slettet.`)) {
+                  deleteLoc(selectedLoc.id)
+                  setSelectedLoc(null)
+                }
+              }} style={{background:'#fef2f2',color:'#dc2626',border:'1px solid #fecaca',borderRadius:8,padding:'10px 14px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3v1M5 3.5l.5 7h3l.5-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Slett lokasjon
+              </button>
+            </div>
+          )
+        })()}
+      </BvSheet>
     </div>
   )
 }

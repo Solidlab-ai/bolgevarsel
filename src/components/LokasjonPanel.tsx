@@ -246,7 +246,21 @@ function HourlyBars({ hourly }: { hourly: HourlyPoint[] }) {
   )
 }
 
-export default function LokasjonPanel({ locations }: { locations: Loc[] }) {
+export type LokasjonPanelClickPayload = {
+  location: Loc
+  weather: WeatherData | null
+  summary: string | null
+  scoreColor: string
+  scoreLabel: string
+}
+
+export default function LokasjonPanel({
+  locations,
+  onLocationClick,
+}: {
+  locations: Loc[]
+  onLocationClick?: (payload: LokasjonPanelClickPayload) => void
+}) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const [hoveredStat, setHoveredStat] = useState<string | null>(null)
   const [data, setData] = useState<Record<number, WeatherData | 'loading' | 'error'>>({})
@@ -289,6 +303,26 @@ export default function LokasjonPanel({ locations }: { locations: Loc[] }) {
   }, [locations, load])
 
   const toggle = (i: number) => {
+    const loc = locations[i]
+    const d = data[i]
+    const weather = d && d !== 'loading' && d !== 'error' ? (d as WeatherData) : null
+    const score = weather ? weather.score : -1
+    const scoreColor = score >= 0 ? SCORE_COLORS[score] : '#94a3b8'
+    const scoreLabel = score >= 0 ? SCORE_LABELS[score] : 'Laster...'
+
+    // Hvis callback er satt, bruk den i stedet for inline-expand
+    if (onLocationClick) {
+      onLocationClick({
+        location: loc,
+        weather,
+        summary: oppsummering[i] || null,
+        scoreColor,
+        scoreLabel,
+      })
+      load(i) // sørg for at data er lastet
+      return
+    }
+
     setActiveIdx(prev => prev === i ? null : i)
     load(i)
   }
@@ -340,7 +374,7 @@ export default function LokasjonPanel({ locations }: { locations: Loc[] }) {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
                   <span style={{ fontSize: 12, fontWeight: 500, color }}>{label}</span>
                 </div>
-                <svg style={{ color: '#94a3b8', transform: isActive ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg style={{ color: '#94a3b8', transform: (onLocationClick ? 'none' : (isActive ? 'rotate(90deg)' : 'none')), transition: 'transform 0.2s' }} width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
             </div>
 

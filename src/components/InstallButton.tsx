@@ -18,9 +18,19 @@ export default function InstallButton({ variant = 'nav', className }: InstallBut
   const [isIOS, setIsIOS] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [showIOSModal, setShowIOSModal] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // PWA er kun for mobil - skjul knappen på desktop
+    const userAgent = window.navigator.userAgent
+    const mobileUA = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(userAgent)
+    const narrowScreen = window.innerWidth < 900
+    setIsMobile(mobileUA || narrowScreen)
+
+    // Stopper her hvis ikke mobil - sparer all annen logikk
+    if (!mobileUA && !narrowScreen) return
 
     // Sjekk om allerede kjører som PWA
     const standalone =
@@ -29,7 +39,6 @@ export default function InstallButton({ variant = 'nav', className }: InstallBut
     setIsStandalone(standalone)
 
     // Detekter iOS Safari
-    const userAgent = window.navigator.userAgent
     const iosSafari =
       /iPad|iPhone|iPod/.test(userAgent) &&
       !(window as any).MSStream
@@ -74,8 +83,10 @@ export default function InstallButton({ variant = 'nav', className }: InstallBut
   }
 
   // Skjul knappen hvis:
+  // - Ikke mobil device (PWA er kun for mobil)
   // - Allerede installert (kjører som PWA)
   // - Ikke iOS OG ingen install-event (browser støtter ikke PWA)
+  if (!isMobile) return null
   if (isStandalone) return null
   if (!isIOS && !installEvent) return null
 

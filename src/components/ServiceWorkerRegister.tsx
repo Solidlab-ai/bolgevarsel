@@ -23,15 +23,31 @@ export function ServiceWorkerRegister() {
       (window.navigator as any).standalone === true;
     if (isStandalone) return;
 
-    // Registrer service worker
+    // I development: ikke registrer SW (forstyrrer hot reload),
+    // og avregistrer eksisterende så cache ikke serverer stale HTML
+    if (process.env.NODE_ENV !== "production") {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((reg) => reg.unregister());
+        });
+      }
+      return;
+    }
+
+    // Registrer service worker (kun i production)
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/" })
         .catch((err) => console.warn("SW registration failed:", err));
     }
 
-    // Detekter iOS (Safari har ikke beforeinstallprompt)
+    // PWA install-prompt er kun for mobil - desktop ser bare SW + offline
     const userAgent = window.navigator.userAgent;
+    const mobileUA = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(userAgent);
+    const narrowScreen = window.innerWidth < 900;
+    if (!mobileUA && !narrowScreen) return;
+
+    // Detekter iOS (Safari har ikke beforeinstallprompt)
     const iosSafari =
       /iPad|iPhone|iPod/.test(userAgent) &&
       !(window as any).MSStream;

@@ -67,7 +67,7 @@ export default function LastNedClient() {
         <Logo/>
         <h1 style={S.h1}>Last ned Bølgevarsel</h1>
         <p style={S.lead}>
-          Få sjø-rapporter rett på telefonen — som en vanlig app, helt gratis å installere.
+          Få sjø-rapporter rett på telefonen — anbefalt for deg som har et aktivt abonnement på Bølgevarsel.
         </p>
 
         {platform === 'ios' && <IosInstructions/>}
@@ -119,8 +119,15 @@ export default function LastNedClient() {
 
         <div style={S.divider}/>
 
+        <div style={S.subscriptionCta}>
+          <div style={{fontSize:13,color:'#475569',lineHeight:1.5,marginBottom:10}}>
+            <strong style={{color:'#0a2a3d'}}>Ikke abonnent ennå?</strong> App-en gir deg full tilgang til daglige sjø-varsler, lokasjonsovervåking og SOS-funksjon når du har et aktivt abonnement.
+          </div>
+          <a href="/" style={S.btnSecondary}>Se abonnementer</a>
+        </div>
+
         <p style={S.smallNote}>
-          Bølgevarsel er en <strong>web-app</strong> — du installerer den direkte fra nettleseren, og trenger ikke gå via App Store eller Google Play.
+          Bølgevarsel installeres direkte fra nettleseren — ingen App Store eller Google Play.
         </p>
       </div>
     </main>
@@ -391,6 +398,29 @@ const S = {
     height: 1,
     background: 'rgba(10,42,61,0.08)',
     margin: '24px 0',
+  } as React.CSSProperties,
+  subscriptionCta: {
+    background: '#f0f8fc',
+    border: '1px solid rgba(26,96,128,0.15)',
+    borderRadius: 12,
+    padding: '16px 18px',
+    marginBottom: 20,
+  } as React.CSSProperties,
+  btnSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'white',
+    color: '#0a2a3d',
+    padding: '10px 18px',
+    borderRadius: 100,
+    border: '1px solid rgba(10,42,61,0.15)',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    textDecoration: 'none',
+    transition: 'all 0.15s',
   } as React.CSSProperties,
   benefits: {
     display: 'flex',

@@ -109,7 +109,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     success: true,
     alert_id: alert.id,
-    contacts_notified: contactsNotified.length,
+    contacts_notified: contacts.length,
+    notifications_sent: contactsNotified.length,
     details: contactsNotified,
   })
 }

@@ -34,10 +34,27 @@ export async function POST(req: NextRequest) {
 
   if (!name || !phone) return NextResponse.json({ error: 'Navn og telefonnummer er påkrevd' }, { status: 400 })
 
-  // Valider telefonnummer-format
-  const cleanPhone = phone.replace(/\s+/g, '')
-  if (!/^\+[0-9]{10,15}$/.test(cleanPhone)) {
-    return NextResponse.json({ error: 'Ugyldig telefonnummer. Bruk format +47XXXXXXXX' }, { status: 400 })
+  // Normaliser og valider telefonnummer
+  // Tillat input som: +47 400 93 494, 40093494, 0047 40093494, +47-400-93-494
+  let cleanPhone = String(phone).replace(/[\s\-()]/g, '') // fjern mellomrom, bindestrek, parenteser
+  if (cleanPhone.startsWith('00')) cleanPhone = '+' + cleanPhone.slice(2) // 00 -> +
+  // Hvis bare 8 sifre (norsk mobilnummer uten landkode), legg til +47
+  if (/^[0-9]{8}$/.test(cleanPhone)) cleanPhone = '+47' + cleanPhone
+
+  // Norsk mobilnummer: +47 etterfulgt av 8 sifre, første sifferet er 4 eller 9
+  const isNorwegianMobile = /^\+47[49][0-9]{7}$/.test(cleanPhone)
+  // Generelt internasjonalt format som fallback (8-15 sifre etter +, ikke +47)
+  const isOtherInternational = /^\+(?!47)[1-9][0-9]{7,14}$/.test(cleanPhone)
+
+  if (!isNorwegianMobile && !isOtherInternational) {
+    if (cleanPhone.startsWith('+47')) {
+      return NextResponse.json({
+        error: 'Ugyldig norsk mobilnummer. Norske mobilnummer er 8 sifre og starter med 4 eller 9 (f.eks. +4740093494).'
+      }, { status: 400 })
+    }
+    return NextResponse.json({
+      error: 'Ugyldig telefonnummer. Bruk format +47XXXXXXXX (norsk) eller +landkode etterfulgt av nummer.'
+    }, { status: 400 })
   }
 
   // Sjekk maks 3 aktive kontakter (trigger i DB gjør dette også, men gi bedre feilmelding)

@@ -7,8 +7,10 @@ interface SosButtonProps {
 }
 
 /**
- * SOS-knapp som vises kun for Sikkerhet-plan-kunder.
- * Klikk: redirecter til /min-side?sos=trigger som starter SOS-flow med countdown.
+ * SOS-knapp som vises kun for Sikkerhet-plan-kunder p\u00e5 /min-side.
+ * P\u00e5 forsiden og andre marketing-sider er den skjult.
+ * Klikk: starter SOS-flow med countdown (lokalt event hvis allerede p\u00e5 /min-side,
+ * ellers redirecter til /min-side?sos=trigger).
  */
 export default function SosButton({ variant = 'nav' }: SosButtonProps) {
   const [show, setShow] = useState(false)
@@ -17,6 +19,13 @@ export default function SosButton({ variant = 'nav' }: SosButtonProps) {
   useEffect(() => {
     setMounted(true)
     if (typeof window === 'undefined') return
+
+    // SOS-knapp skal kun vises p\u00e5 /min-side (innlogget-context).
+    // P\u00e5 forsiden, /priser osv er den irrelevant og forvirrende.
+    if (!window.location.pathname.startsWith('/min-side')) {
+      setShow(false)
+      return
+    }
 
     // Cache plan i localStorage for å unngå unødvendige API-kall mellom sider
     const cachedPlan = localStorage.getItem('bv_plan')

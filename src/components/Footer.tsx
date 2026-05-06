@@ -47,19 +47,42 @@ export default function Footer() {
             hei@bolgevarsel.no
           </a>
           <p className={styles.about}>
-            Laget av Solidlab.ai i Stavanger. Data fra met.no (CC BY 4.0) og Open-Meteo Marine.
+            Data fra met.no (CC BY 4.0) og Open-Meteo Marine.
           </p>
+
+          {/* Solidlab venture badge — bygger tillit, kobler til moderselskap */}
+          <a
+            href="https://solidlab.ai"
+            target="_blank"
+            rel="noopener"
+            className={styles.solidlabBadge}
+            aria-label="Bølgevarsel er en venture fra Solidlab.ai"
+          >
+            <span className={styles.solidlabBadgeDot} aria-hidden="true" />
+            <span className={styles.solidlabBadgeLabel}>A venture from</span>
+            <span className={styles.solidlabBadgeName}>Solidlab</span>
+          </a>
+          <a
+            href="https://solidlab.ai/trust"
+            target="_blank"
+            rel="noopener"
+            className={styles.solidlabTrust}
+          >
+            Hvorfor du kan stole på oss
+          </a>
         </div>
 
       </div>
 
       {/* Bunnlinje */}
       <div className={styles.bottom}>
-        <span>© 2026 Solidlab.ai</span>
+        <span>© 2026 <a href="https://solidlab.ai" target="_blank" rel="noopener">Solidlab.ai</a></span>
         <span className={styles.bottomDot}>·</span>
         <a href="/personvern">Personvern</a>
         <span className={styles.bottomDot}>·</span>
         <a href="/kjopsvilkar">Kjøpsvilkår</a>
+        <span className={styles.bottomDot}>·</span>
+        <a href="/om">Om oss</a>
         <span className={styles.bottomDot}>·</span>
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">met.no CC BY 4.0</a>
       </div>

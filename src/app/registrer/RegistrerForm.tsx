@@ -122,6 +122,17 @@ export default function RegistrerForm() {
           <h1 className={styles.title}>Velg ditt abonnement</h1>
           <p className={styles.sub}>7 dager gratis. Avslutt når du vil.</p>
         </div>
+        <a
+          href="https://solidlab.ai/trust"
+          target="_blank"
+          rel="noopener"
+          className={styles.trustStrip}
+          aria-label="Bølgevarsel er en venture fra Solidlab — les om hvorfor du kan stole på oss"
+        >
+          <span className={styles.trustStripDot} aria-hidden="true" />
+          <span>A venture from <span className={styles.trustStripBrand}>Solidlab</span> · GDPR · Norsk drift</span>
+          <span className={styles.trustStripArrow} aria-hidden="true">→</span>
+        </a>
         <div className={styles.plans}>
           {PLANS.map((plan) => (
             <button key={plan.id} type="button" className={`${styles.plan} ${selectedPlan === plan.id ? styles.selected : ''} ${plan.featured && selectedPlan === plan.id ? styles.featured : ''}`} onClick={() => handlePlanClick(plan.id)} aria-pressed={selectedPlan === plan.id}>

@@ -14,6 +14,49 @@
 }
 .container { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; }
 .header { text-align: center; margin-bottom: 2.5rem; }
+
+/* Trust strip — Solidlab venture-attribusjon over priser */
+.trustStrip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  margin: -1rem auto 2rem;
+  max-width: fit-content;
+  background: rgba(74,90,98,0.06);
+  border: 0.5px solid rgba(74,90,98,0.15);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: #4A5A62;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+}
+.trustStrip:hover {
+  background: rgba(74,90,98,0.1);
+  border-color: rgba(74,90,98,0.25);
+  color: #2c3a42;
+}
+.trustStripDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #4A5A62;
+  flex-shrink: 0;
+}
+.trustStripBrand {
+  font-weight: 600;
+  color: #0a2a3d;
+}
+.trustStripArrow {
+  opacity: 0.5;
+  margin-left: 0.15rem;
+}
+.trustStrip:hover .trustStripArrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
 .title { font-family: 'Fraunces', serif; font-size: 2.5rem; font-weight: 300; color: var(--ocean-deep); letter-spacing: -0.02em; margin-bottom: 0.5rem; }
 .sub { color: var(--text-light); font-size: 1rem; }
 .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }

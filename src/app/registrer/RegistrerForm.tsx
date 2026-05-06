@@ -4,6 +4,20 @@ import { useSearchParams } from 'next/navigation'
 import styles from './page.module.css'
 import { PLANS } from '@/lib/plans'
 
+// Lett wrapper rundt window.gtag for type-safety og fail-silent
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void
+    dataLayer?: unknown[]
+  }
+}
+
+function trackEvent(name: string, params?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', name, params || {})
+  }
+}
+
 export default function RegistrerForm() {
   const searchParams = useSearchParams()
   const defaultPlan = searchParams.get('plan') || 'familie'
@@ -19,6 +33,12 @@ export default function RegistrerForm() {
 
   function handlePlanClick(planId: string) {
     setSelectedPlan(planId)
+    const plan = PLANS.find(p => p.id === planId)
+    if (plan) {
+      trackEvent('select_item', {
+        items: [{ item_id: plan.id, item_name: plan.name, price: plan.price, item_category: 'subscription' }],
+      })
+    }
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       setTimeout(() => emailRef.current?.focus({ preventScroll: true }), 400)
@@ -30,6 +50,12 @@ export default function RegistrerForm() {
     if (!email) return
     setLoading('stripe')
     setError('')
+    trackEvent('begin_checkout', {
+      currency: 'NOK',
+      value: chosen.price,
+      payment_type: 'stripe',
+      items: [{ item_id: chosen.id, item_name: chosen.name, price: chosen.price, item_category: 'subscription' }],
+    })
     try {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
@@ -54,6 +80,12 @@ export default function RegistrerForm() {
     }
     setLoading('vipps')
     setError('')
+    trackEvent('begin_checkout', {
+      currency: 'NOK',
+      value: chosen.price,
+      payment_type: 'vipps',
+      items: [{ item_id: chosen.id, item_name: chosen.name, price: chosen.price, item_category: 'subscription' }],
+    })
     try {
       const res = await fetch('/api/vipps/create-agreement', {
         method: 'POST',

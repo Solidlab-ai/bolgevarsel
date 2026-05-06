@@ -2,6 +2,8 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { gaPurchaseEvent } from '@/lib/ga'
+import { getPlanById } from '@/lib/plans'
 
 const RESEND_KEY = process.env.RESEND_API_KEY!
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bolgevarsel.no'
@@ -157,9 +159,33 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object
+        // Hent subscriberen for å få email + plan
+        const { data: sub } = await supabase
+          .from('bv_subscribers')
+          .select('email, plan')
+          .eq('stripe_customer_id', invoice.customer)
+          .maybeSingle()
+
+        // Sett status active uansett (cycle = månedlig fornyelse, ny = første betaling)
         if (invoice.billing_reason === 'subscription_cycle') {
           await supabase.from('bv_subscribers').update({ status: 'active' })
             .eq('stripe_customer_id', invoice.customer)
+        }
+
+        // Send GA4 purchase-event KUN ved første betaling (subscription_create)
+        // — det er dette som er den ekte konverteringen for Google Ads ROAS
+        if (invoice.billing_reason === 'subscription_create' && sub?.email && sub?.plan) {
+          const plan = getPlanById(sub.plan)
+          if (plan) {
+            await gaPurchaseEvent({
+              email: sub.email,
+              transactionId: invoice.id || `stripe-${Date.now()}`,
+              value: plan.price,
+              planId: plan.id,
+              planName: plan.name,
+              paymentProvider: 'stripe',
+            })
+          }
         }
         break
       }

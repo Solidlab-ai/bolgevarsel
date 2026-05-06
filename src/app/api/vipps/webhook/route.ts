@@ -3,6 +3,8 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { gaPurchaseEvent } from '@/lib/ga'
+import { getPlanById } from '@/lib/plans'
 
 /**
  * POST /api/vipps/webhook
@@ -83,6 +85,31 @@ export async function POST(req: NextRequest) {
           const next = new Date()
           next.setUTCMonth(next.getUTCMonth() + 1)
           updates.next_charge_due_at = next.toISOString()
+        }
+        // Send GA4 purchase-event ved FØRSTE charge (konvertering fra trial til paid)
+        // Vi sjekker om abonnementet allerede har 'active' status — i så fall er
+        // dette en månedlig fornyelse, ikke en ny konvertering.
+        {
+          const { data: fullSub } = await supabase
+            .from('bv_subscribers')
+            .select('email, plan, status')
+            .eq('id', sub.id)
+            .single()
+
+          // Status er fortsatt 'trialing' når dette er første charge
+          if (fullSub?.status === 'trialing' && fullSub.email && fullSub.plan) {
+            const plan = getPlanById(fullSub.plan)
+            if (plan) {
+              await gaPurchaseEvent({
+                email: fullSub.email,
+                transactionId: body.chargeId || body.charge_id || `vipps-${Date.now()}`,
+                value: plan.price,
+                planId: plan.id,
+                planName: plan.name,
+                paymentProvider: 'vipps',
+              })
+            }
+          }
         }
         break
 

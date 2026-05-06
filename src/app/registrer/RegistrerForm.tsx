@@ -9,7 +9,8 @@ export default function RegistrerForm() {
   const defaultPlan = searchParams.get('plan') || 'familie'
   const [selectedPlan, setSelectedPlan] = useState(defaultPlan)
   const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [loading, setLoading] = useState<null | 'stripe' | 'vipps'>(null)
   const [error, setError] = useState('')
   const emailRef = useRef<HTMLInputElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -18,17 +19,16 @@ export default function RegistrerForm() {
 
   function handlePlanClick(planId: string) {
     setSelectedPlan(planId)
-    // Smooth scroll til form og fokuser e-post-felt etter en kort delay
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       setTimeout(() => emailRef.current?.focus({ preventScroll: true }), 400)
     }, 50)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleStripe(e: React.FormEvent) {
     e.preventDefault()
     if (!email) return
-    setLoading(true)
+    setLoading('stripe')
     setError('')
     try {
       const res = await fetch('/api/create-checkout', {
@@ -42,7 +42,31 @@ export default function RegistrerForm() {
     } catch {
       setError('Noe gikk galt. Prøv igjen.')
     } finally {
-      setLoading(false)
+      setLoading(null)
+    }
+  }
+
+  async function handleVipps() {
+    if (!email) {
+      setError('Skriv inn e-post først')
+      emailRef.current?.focus()
+      return
+    }
+    setLoading('vipps')
+    setError('')
+    try {
+      const res = await fetch('/api/vipps/create-agreement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, plan: selectedPlan, phoneNumber }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else setError(data.error || 'Vipps feilet — prøv kort i stedet?')
+    } catch {
+      setError('Noe gikk galt med Vipps. Prøv igjen.')
+    } finally {
+      setLoading(null)
     }
   }
 
@@ -81,15 +105,30 @@ export default function RegistrerForm() {
             </button>
           ))}
         </div>
-        <form onSubmit={handleSubmit} className={styles.form} ref={formRef}>
+        <form onSubmit={handleStripe} className={styles.form} ref={formRef}>
           <div className={styles.formChosen}>
             <span>Du har valgt: <strong>{chosen.name}</strong> — {chosen.price} kr/mnd</span>
           </div>
           <label className={styles.label} htmlFor="email">Din e-postadresse</label>
           <input id="email" ref={emailRef} className={styles.input} type="email" placeholder="hei@eksempel.no" value={email} onChange={e => setEmail(e.target.value)} required/>
+          <label className={styles.label} htmlFor="phone" style={{marginTop:'1rem'}}>Mobilnummer <span style={{fontWeight:400,color:'#6b8fa3'}}>(valgfritt — for Vipps)</span></label>
+          <input id="phone" className={styles.input} type="tel" placeholder="40 09 34 94" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} autoComplete="tel"/>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.submit} disabled={loading}>
-            {loading ? 'Sender...' : `Start 7 dager gratis med ${chosen.name} →`}
+          <button type="button" onClick={handleVipps} className={styles.vippsBtn} disabled={loading !== null}>
+            {loading === 'vipps' ? 'Sender til Vipps…' : (
+              <>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect width="24" height="24" rx="6" fill="white"/>
+                  <path d="M5 9.5c.6 0 1.1.5 1.1 1.1 0 1.7 1.5 3 3.4 3 1.6 0 2.7-.9 4-2.6.4-.5.9-.7 1.4-.7.7 0 1.3.5 1.3 1.2 0 .3-.1.6-.3.9-1.7 2.5-3.7 3.7-6.4 3.7-3.1 0-5.5-2-5.5-5.5 0-.6.4-1.1 1-1.1z" fill="#FF5B24"/>
+                  <circle cx="14.8" cy="7.5" r="1.5" fill="#FF5B24"/>
+                </svg>
+                Betal med Vipps
+              </>
+            )}
+          </button>
+          <div className={styles.divider}><span>eller</span></div>
+          <button type="submit" className={styles.submit} disabled={loading !== null}>
+            {loading === 'stripe' ? 'Sender...' : `Betal med kort — ${chosen.price} kr/mnd`}
           </button>
           <p className={styles.hint}>Kortet belastes ikke før etter 7 dager — avslutt når som helst</p>
           <p className={styles.legalLinks}>

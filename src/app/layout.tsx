@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
 import './globals.css'
 
 const BASE = 'https://bolgevarsel.no'
+const GA_ID = 'G-5FT8K97G4J'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE),
@@ -69,7 +71,28 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="no">
-      <body>{children}<ServiceWorkerRegister /><Analytics /><SpeedInsights /></body>
+      <body>
+        {children}
+        <ServiceWorkerRegister />
+        <Analytics />
+        <SpeedInsights />
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}', {
+              page_path: window.location.pathname,
+              anonymize_ip: true
+            });
+          `}
+        </Script>
+      </body>
     </html>
   )
 }

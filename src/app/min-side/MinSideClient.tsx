@@ -575,8 +575,8 @@ export default function MinSideClient() {
               <div style={{background:'#f8fbfc',borderRadius:10,padding:'10px 12px',marginBottom:10}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
                   <div>
-                    <div style={{fontSize:13,fontWeight:500,color:'#0a2a3d'}}>{({'kyst':'Kyst-plan','familie':'Familie-plan','pro':'Pro-plan','sikkerhet':'Sikkerhet-plan'}[sub!.plan]||sub!.plan)}</div>
-                    <div style={{fontSize:11,color:'#6b8fa3'}}>{({'kyst':'49','familie':'179','pro':'299','sikkerhet':'499'}[sub!.plan]||'—')} kr/mnd</div>
+                    <div style={{fontSize:13,fontWeight:500,color:'#0a2a3d'}}>{({'kyst':'Kyst-plan','kyst-pluss':'Kyst+ plan','familie':'Familie-plan','pro':'Pro-plan','sikkerhet':'Sikkerhet-plan'}[sub!.plan]||sub!.plan)}</div>
+                    <div style={{fontSize:11,color:'#6b8fa3'}}>{({'kyst':'49','kyst-pluss':'78','familie':'179','pro':'299','sikkerhet':'499'}[sub!.plan]||'—')} kr/mnd</div>
                   </div>
                   <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#e8f5ed',color:'#16a34a'}}>{sub!.status==='active'?'Aktivt':'Pauset'}</span>
                 </div>
@@ -584,20 +584,20 @@ export default function MinSideClient() {
                 <div style={{marginBottom:6}}>
                   <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#6b8fa3',marginBottom:4}}>
                     <span>Mottakere brukt</span>
-                    <span style={{fontWeight:500,color:'#0a2a3d'}}>{recs.length} / {sub!.plan==='kyst'?1:sub!.plan==='familie'?5:20}</span>
+                    <span style={{fontWeight:500,color:'#0a2a3d'}}>{recs.length} / {({'kyst':0,'kyst-pluss':1,'familie':5,'pro':5,'sikkerhet':5} as any)[sub!.plan] ?? 20}</span>
                   </div>
                   <div style={{height:4,borderRadius:2,background:'rgba(10,42,61,0.08)'}}>
-                    <div style={{height:4,borderRadius:2,background:'#1a6080',width:`${Math.min((recs.length/(sub!.plan==='kyst'?1:sub!.plan==='familie'?5:20))*100,100)}%`,transition:'width 0.4s'}}/>
+                    <div style={{height:4,borderRadius:2,background:'#1a6080',width:`${Math.min((recs.length/(({'kyst':0.001,'kyst-pluss':1,'familie':5,'pro':5,'sikkerhet':5} as any)[sub!.plan] ?? 20))*100,100)}%`,transition:'width 0.4s'}}/>
                   </div>
                 </div>
                 {/* Lokasjoner progress */}
                 <div>
                   <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#6b8fa3',marginBottom:3}}>
                     <span>Lokasjoner brukt</span>
-                    <span style={{fontWeight:500,color:'#0a2a3d'}}>{locs.length} / {sub!.plan==='kyst'?1:sub!.plan==='familie'?5:20}</span>
+                    <span style={{fontWeight:500,color:'#0a2a3d'}}>{locs.length} / {({'kyst':1,'kyst-pluss':1,'familie':3,'pro':5,'sikkerhet':5} as any)[sub!.plan] ?? 20}</span>
                   </div>
                   <div style={{height:4,borderRadius:2,background:'rgba(10,42,61,0.08)'}}>
-                    <div style={{height:4,borderRadius:2,background:'#1a6080',width:`${Math.min((locs.length/(sub!.plan==='kyst'?1:sub!.plan==='familie'?5:20))*100,100)}%`,transition:'width 0.4s'}}/>
+                    <div style={{height:4,borderRadius:2,background:'#1a6080',width:`${Math.min((locs.length/(({'kyst':1,'kyst-pluss':1,'familie':3,'pro':5,'sikkerhet':5} as any)[sub!.plan] ?? 20))*100,100)}%`,transition:'width 0.4s'}}/>
                   </div>
                 </div>
               </div>

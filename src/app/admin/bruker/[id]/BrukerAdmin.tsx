@@ -112,9 +112,9 @@ export default function BrukerAdmin({ sub }: { sub: any }) {
         <div style={sectionStyle}>
           <span style={labelStyle}>Abonnementsplan</span>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-            {['kyst', 'familie', 'pro'].map(p => (
+            {['kyst', 'kyst-pluss', 'familie', 'pro'].map(p => (
               <button key={p} onClick={() => patch('plan', p)} style={{ ...btn(sub.plan === p ? '#4da8cc' : '#1e293b', ''), border: sub.plan === p ? 'none' : '1px solid rgba(255,255,255,0.15)', opacity: sub.plan === p ? 1 : 0.7 }}>
-                {p.charAt(0).toUpperCase() + p.slice(1)} {sub.plan === p ? '✓' : ''}
+                {p === 'kyst-pluss' ? 'Kyst+' : p.charAt(0).toUpperCase() + p.slice(1)} {sub.plan === p ? '✓' : ''}
               </button>
             ))}
           </div>

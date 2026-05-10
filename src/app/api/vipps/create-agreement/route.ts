@@ -9,7 +9,7 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 
 /**
  * POST /api/vipps/create-agreement
- * Body: { email: string, plan: 'kyst'|'familie'|'pro', phoneNumber?: string }
+ * Body: { email: string, plan: 'kyst'|'kyst-pluss'|'familie'|'pro', phoneNumber?: string }
  *
  * Oppretter draft agreement hos Vipps og returnerer URL brukeren skal redirectes til.
  */

@@ -2,14 +2,14 @@
  * Vipps Recurring API helper
  *
  * Wrapper rundt Vipps Recurring API v3 + Access Token API.
- * Bruker test-miljø som default (apitest.vipps.no), bytter til prod via VIPPS_ENV=prod.
+ * Bruker test-miljø som default (apitest.vippsmobilepay.com), bytter til prod via VIPPS_BASE_URL=https://api.vippsmobilepay.com.
  *
  * Docs:
  * - Recurring: https://developer.vippsmobilepay.com/api/recurring
  * - Access Token: https://developer.vippsmobilepay.com/api/access-token
  */
 
-const VIPPS_BASE = process.env.VIPPS_ENV === 'prod' ? 'https://api.vipps.no' : 'https://apitest.vipps.no'
+const VIPPS_BASE = process.env.VIPPS_BASE_URL || 'https://apitest.vippsmobilepay.com'
 
 // System headers — sendt med alle requester for debugging hos Vipps support
 const SYSTEM_HEADERS = {

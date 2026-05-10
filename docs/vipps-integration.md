@@ -205,3 +205,4 @@ docs/vipps-integration.md                         (denne fila)
 - Recurring API: https://developer.vippsmobilepay.com/docs/APIs/recurring-api/
 - Test-miljø: https://developer.vippsmobilepay.com/docs/knowledge-base/test-environment/
 - API-spec: https://developer.vippsmobilepay.com/api/recurring/
+

@@ -7,6 +7,7 @@ import SosButton from '@/components/SosButton'
 import SosCountdownModal from '@/components/SosCountdownModal'
 import BvSelect from '@/components/BvSelect'
 import BvSheet from '@/components/BvSheet'
+import { KvitteringerSeksjon } from './KvitteringerSeksjon'
 
 const S = {
   page: { minHeight:'100vh', background:'#e8f4f8', fontFamily:'DM Sans, sans-serif' } as React.CSSProperties,
@@ -1351,6 +1352,10 @@ export default function MinSideClient() {
                   </div>
                 </div>
               )}
+
+              {/* Kvitteringer */}
+              <KvitteringerSeksjon email={sub!.email} />
+
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'8px'}}>Abonnementsstatus</div>
                 {(sub!.status === 'active' || sub!.status === 'trialing') && sub!.payment_provider !== 'vipps' ? (

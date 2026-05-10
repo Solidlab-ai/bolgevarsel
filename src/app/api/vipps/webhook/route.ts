@@ -6,6 +6,7 @@ import { createHash, createHmac, timingSafeEqual } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { gaPurchaseEvent } from '@/lib/ga'
 import { getPlanById } from '@/lib/plans'
+import { createInvoice, sendInvoiceEmail } from '@/lib/invoices'
 
 /**
  * Verifiserer HMAC-signatur fra Vipps Webhooks API.
@@ -182,6 +183,42 @@ export async function POST(req: NextRequest) {
           next.setUTCMonth(next.getUTCMonth() + 1)
           updates.next_charge_due_at = next.toISOString()
         }
+
+        // Generer og send salgsbilag (kvittering) — separat try/catch så webhook ikke feiler
+        // hvis bilag-generering har et midlertidig problem (Resend nede e.l.)
+        try {
+          const { data: fullSubForInvoice } = await supabase
+            .from('bv_subscribers')
+            .select('email, plan, phone_number, status')
+            .eq('id', sub.id)
+            .single()
+
+          if (fullSubForInvoice?.email && fullSubForInvoice.plan) {
+            // Service-periode = denne måneden (charge dekker neste måneds tjeneste)
+            const periodStart = new Date()
+            const periodEnd = new Date()
+            periodEnd.setUTCMonth(periodEnd.getUTCMonth() + 1)
+            periodEnd.setUTCDate(periodEnd.getUTCDate() - 1)
+
+            const invoice = await createInvoice({
+              subscriberId: sub.id,
+              customerEmail: fullSubForInvoice.email,
+              customerPhone: fullSubForInvoice.phone_number,
+              planId: fullSubForInvoice.plan,
+              paymentProvider: 'vipps',
+              paymentReference: body.chargeId || body.charge_id || null,
+              servicePeriodStart: periodStart,
+              servicePeriodEnd: periodEnd,
+              paidAt: new Date(),
+            })
+
+            await sendInvoiceEmail(invoice)
+            console.log('[vipps-webhook] Salgsbilag opprettet:', invoice.invoice_number)
+          }
+        } catch (invoiceErr) {
+          console.error('[vipps-webhook] Feil ved bilag-generering:', invoiceErr)
+        }
+
         // Send GA4 purchase-event ved FØRSTE charge (konvertering fra trial til paid)
         // Vi sjekker om abonnementet allerede har 'active' status — i så fall er
         // dette en månedlig fornyelse, ikke en ny konvertering.

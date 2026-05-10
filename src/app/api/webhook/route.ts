@@ -4,6 +4,7 @@ import { constructWebhookEvent } from '@/lib/stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { gaPurchaseEvent } from '@/lib/ga'
 import { getPlanById } from '@/lib/plans'
+import { createInvoice, sendInvoiceEmail } from '@/lib/invoices'
 
 const RESEND_KEY = process.env.RESEND_API_KEY!
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bolgevarsel.no'
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
         // Hent subscriberen for å få email + plan
         const { data: sub } = await supabase
           .from('bv_subscribers')
-          .select('email, plan')
+          .select('id, email, plan, phone_number')
           .eq('stripe_customer_id', invoice.customer)
           .maybeSingle()
 
@@ -170,6 +171,29 @@ export async function POST(req: NextRequest) {
         if (invoice.billing_reason === 'subscription_cycle') {
           await supabase.from('bv_subscribers').update({ status: 'active' })
             .eq('stripe_customer_id', invoice.customer)
+        }
+
+        // Generer salgsbilag (kvittering med MVA-spec) — alltid ved betaling
+        if (sub?.id && sub.email && sub.plan) {
+          try {
+            const periodStart = new Date(invoice.period_start * 1000)
+            const periodEnd = new Date(invoice.period_end * 1000)
+            const created = await createInvoice({
+              subscriberId: sub.id,
+              customerEmail: sub.email,
+              customerPhone: sub.phone_number,
+              planId: sub.plan,
+              paymentProvider: 'stripe',
+              paymentReference: invoice.id || null,
+              servicePeriodStart: periodStart,
+              servicePeriodEnd: periodEnd,
+              paidAt: new Date(),
+            })
+            await sendInvoiceEmail(created)
+            console.log('[stripe-webhook] Salgsbilag opprettet:', created.invoice_number)
+          } catch (invoiceErr) {
+            console.error('[stripe-webhook] Feil ved bilag-generering:', invoiceErr)
+          }
         }
 
         // Send GA4 purchase-event KUN ved første betaling (subscription_create)

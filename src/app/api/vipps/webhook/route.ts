@@ -34,7 +34,10 @@ function verifyVippsSignature(
   // 1. Hash av rawBody
   const computedContentHash = createHash('sha256').update(rawBody, 'utf8').digest('base64')
   if (computedContentHash !== contentSha256Header) {
-    console.error('[vipps-webhook] content-sha256 mismatch')
+    console.error('[vipps-webhook] content-sha256 mismatch', {
+      computed: computedContentHash,
+      header: contentSha256Header,
+    })
     return false
   }
 
@@ -56,8 +59,29 @@ function verifyVippsSignature(
   // 5. Constant-time comparison
   const computedBuf = Buffer.from(computedSig)
   const providedBuf = Buffer.from(providedSig)
-  if (computedBuf.length !== providedBuf.length) return false
-  return timingSafeEqual(computedBuf, providedBuf)
+  if (computedBuf.length !== providedBuf.length) {
+    console.error('[vipps-webhook] HMAC mismatch (lengde)', {
+      signatureText,
+      computedSig,
+      providedSig,
+      pathAndQuery,
+      host,
+      date,
+    })
+    return false
+  }
+  const ok = timingSafeEqual(computedBuf, providedBuf)
+  if (!ok) {
+    console.error('[vipps-webhook] HMAC mismatch', {
+      signatureText,
+      computedSig,
+      providedSig,
+      pathAndQuery,
+      host,
+      date,
+    })
+  }
+  return ok
 }
 
 /**

@@ -54,7 +54,20 @@ function BrandIllustration() {
   )
 }
 
-type Sub = { id:string; email:string; plan:string; status:string; send_time?:string }
+type Sub = {
+  id: string
+  email: string
+  plan: string
+  status: string
+  send_time?: string
+  payment_provider?: 'stripe' | 'vipps' | null
+  phone_number?: string | null
+  vipps_status?: string | null
+  vipps_agreement_id?: string | null
+  stripe_subscription_id?: string | null
+  trial_ends_at?: string | null
+  next_charge_due_at?: string | null
+}
 type Loc = { id:string; name:string; lat:number; lon:number }
 
 // Tids-options grupperte etter tid på døgnet for raskere navigering
@@ -1290,19 +1303,66 @@ export default function MinSideClient() {
               </div>
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'2px'}}>Abonnement</div>
-                <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+                <div style={{display:'flex',alignItems:'center',gap:'0.5rem',flexWrap:'wrap'}}>
                   <span style={{fontWeight:500,color:'#0a2a3d'}}>{planLabel[sub!.plan]}</span>
-                  <span style={S.tag(sub!.status==='active')}>{sub!.status==='active'?'Aktivt':'Inaktivt'}</span>
+                  {(() => {
+                    const s = sub!.status
+                    if (s === 'trialing') {
+                      const trialEnd = sub!.trial_ends_at ? new Date(sub!.trial_ends_at) : null
+                      const trialLabel = trialEnd ? `Prøveperiode til ${trialEnd.getDate()}.${trialEnd.getMonth()+1}` : 'Prøveperiode'
+                      return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#dbeafe',color:'#1e40af'}}>{trialLabel}</span>
+                    }
+                    if (s === 'active') return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#e8f5ed',color:'#16a34a'}}>Aktivt</span>
+                    if (s === 'paused') return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#fef3c7',color:'#92400e'}}>Pauset</span>
+                    if (s === 'past_due') return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#fee2e2',color:'#991b1b'}}>Betaling feilet</span>
+                    if (s === 'cancelled') return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#f1f5f9',color:'#475569'}}>Avsluttet</span>
+                    return <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#f1f5f9',color:'#64748b'}}>Inaktivt</span>
+                  })()}
                 </div>
+                {sub!.status === 'trialing' && sub!.next_charge_due_at && (
+                  <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginTop:'6px'}}>
+                    Første belastning {new Date(sub!.next_charge_due_at).toLocaleDateString('nb-NO',{day:'numeric',month:'long'})}
+                  </div>
+                )}
               </div>
+
+              {/* Betalingsmetode */}
+              {sub!.payment_provider && (
+                <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
+                  <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'4px'}}>Betalingsmetode</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                    {sub!.payment_provider === 'vipps' ? (
+                      <>
+                        <span style={{display:'inline-flex',alignItems:'center',gap:6,fontWeight:600,color:'#ff5b24',fontSize:14}}>
+                          <span style={{display:'inline-block',padding:'2px 8px',background:'#ff5b24',color:'#fff',borderRadius:4,fontSize:11,letterSpacing:'0.04em'}}>VIPPS</span>
+                          {sub!.phone_number && (
+                            <span style={{color:'#0a2a3d',fontWeight:500}}>
+                              {sub!.phone_number.length === 8 ? `${sub!.phone_number.slice(0,3)} ${sub!.phone_number.slice(3,5)} ${sub!.phone_number.slice(5)}` : sub!.phone_number}
+                            </span>
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <span style={{display:'inline-flex',alignItems:'center',gap:6,color:'#0a2a3d',fontSize:14,fontWeight:500}}>
+                        <span style={{display:'inline-block',padding:'2px 8px',background:'#635bff',color:'#fff',borderRadius:4,fontSize:11,letterSpacing:'0.04em'}}>KORT</span>
+                        Betaling via Stripe
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'8px'}}>Abonnementsstatus</div>
-                {sub!.status === 'active' ? (
+                {(sub!.status === 'active' || sub!.status === 'trialing') && sub!.payment_provider !== 'vipps' ? (
                   <button onClick={async()=>{setAccountLoading('pause');await fetch('/api/min-side/frys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscriber_id:sub!.id,action:'pause'})});setSub({...sub!,status:'paused'});setAccountLoading(null)}}
                     style={{padding:'0.5rem 1rem',borderRadius:8,background:'#fff',border:'1px solid rgba(10,42,61,0.15)',color:'#0a2a3d',cursor:'pointer',fontSize:'0.82rem',fontWeight:500,display:'inline-flex',alignItems:'center',gap:'6px'}}>
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="2" width="3.5" height="9" rx="0.5" fill="currentColor"/><rect x="7.5" y="2" width="3.5" height="9" rx="0.5" fill="currentColor"/></svg>
                     {accountLoading==='pause'?'Fryser...':'Frys abonnement'}
                   </button>
+                ) : (sub!.status === 'active' || sub!.status === 'trialing') && sub!.payment_provider === 'vipps' ? (
+                  <p style={{fontSize:'0.82rem',color:'#0a2a3d',margin:0}}>
+                    Vipps-abonnement kan ikke fryses. Bruk «Slett konto» nederst hvis du vil avslutte.
+                  </p>
                 ) : sub!.status === 'paused' ? (
                   <button onClick={async()=>{setAccountLoading('resume');await fetch('/api/min-side/frys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscriber_id:sub!.id,action:'resume'})});setSub({...sub!,status:'active'});setAccountLoading(null)}}
                     style={{padding:'0.5rem 1rem',borderRadius:8,background:'#1a6080',border:'none',color:'white',cursor:'pointer',fontSize:'0.82rem',fontWeight:500,display:'inline-flex',alignItems:'center',gap:'6px'}}>

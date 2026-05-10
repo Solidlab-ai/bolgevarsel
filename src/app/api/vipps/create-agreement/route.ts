@@ -28,12 +28,16 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
+    // Normaliser telefonnummer til 8-siffer norsk format
+    const normalizedPhone = phoneNumber?.replace(/\D/g, '').slice(-8)
+
     // Pre-create eller oppdater subscriber-rad slik at vi har et sted å henge agreementId fra callback
     await supabase.from('bv_subscribers').upsert(
       {
         email,
         plan,
         payment_provider: 'vipps',
+        phone_number: normalizedPhone || null,
         status: 'inactive',
       },
       { onConflict: 'email' },
@@ -46,7 +50,7 @@ export async function POST(req: NextRequest) {
       amountInOre: nokToOre(selectedPlan.price),
       productName: `Bølgevarsel ${selectedPlan.name}`,
       productDescription: `${selectedPlan.name} — månedsabonnement`,
-      phoneNumber: phoneNumber?.replace(/\D/g, '').slice(-8),
+      phoneNumber: normalizedPhone,
       merchantRedirectUrl: `${baseUrl}/api/vipps/callback?email=${encodeURIComponent(email)}`,
       merchantAgreementUrl: `${baseUrl}/min-side`,
       idempotencyKey,

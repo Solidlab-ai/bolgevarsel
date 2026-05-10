@@ -44,9 +44,10 @@ function verifyVippsSignature(
   // 2. Bygg signature-tekst
   const signatureText = `POST\n${pathAndQuery}\n${date};${host};${computedContentHash}`
 
-  // 3. HMAC-SHA256 med secret (secret er base64-encoded fra Vipps)
-  const secretBytes = Buffer.from(secret, 'base64')
-  const computedSig = createHmac('sha256', secretBytes).update(signatureText, 'utf8').digest('base64')
+  // 3. HMAC-SHA256 — Vipps' eksempel bruker secret som streng direkte (ikke base64-dekodet)
+  // Vi prøver begge varianter for robusthet
+  const sigStringSecret = createHmac('sha256', secret).update(signatureText, 'utf8').digest('base64')
+  const sigBase64Secret = createHmac('sha256', Buffer.from(secret, 'base64')).update(signatureText, 'utf8').digest('base64')
 
   // 4. Parse Authorization-header → "HMAC-SHA256 SignedHeaders=...&Signature=<sig>"
   const sigMatch = authorizationHeader.match(/Signature=([A-Za-z0-9+/=]+)/)
@@ -56,32 +57,21 @@ function verifyVippsSignature(
   }
   const providedSig = sigMatch[1]
 
-  // 5. Constant-time comparison
-  const computedBuf = Buffer.from(computedSig)
-  const providedBuf = Buffer.from(providedSig)
-  if (computedBuf.length !== providedBuf.length) {
-    console.error('[vipps-webhook] HMAC mismatch (lengde)', {
-      signatureText,
-      computedSig,
-      providedSig,
-      pathAndQuery,
-      host,
-      date,
-    })
-    return false
+  // 5. Sjekk mot begge varianter
+  if (sigStringSecret === providedSig || sigBase64Secret === providedSig) {
+    return true
   }
-  const ok = timingSafeEqual(computedBuf, providedBuf)
-  if (!ok) {
-    console.error('[vipps-webhook] HMAC mismatch', {
-      signatureText,
-      computedSig,
-      providedSig,
-      pathAndQuery,
-      host,
-      date,
-    })
-  }
-  return ok
+
+  console.error('[vipps-webhook] HMAC mismatch', {
+    signatureText,
+    sigStringSecret,
+    sigBase64Secret,
+    providedSig,
+    pathAndQuery,
+    host,
+    date,
+  })
+  return false
 }
 
 /**

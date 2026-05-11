@@ -42,11 +42,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Ugyldig JSON' }, { status: 400 })
   }
 
-  const { imei, latitude, longitude, gpsValid, voltage, receivedAt } = payload
+  const { imei, latitude, longitude, gpsValid, voltage, receivedAt, dryRun } = payload
 
   if (!imei) {
     return NextResponse.json({ error: 'Mangler imei' }, { status: 400 })
   }
+
+  // dryRun=true: validerer og logger, men sender ingen SMS/anrop
+  const isDryRun = dryRun === true || dryRun === 'true'
 
   const supabase = getSupabaseAdmin()
 
@@ -94,6 +97,39 @@ export async function POST(req: NextRequest) {
 
   if (!contacts || contacts.length === 0) {
     return NextResponse.json({ error: 'Ingen nodkontakter registrert' }, { status: 400 })
+  }
+
+  // dryRun: returner uten å sende noe
+  if (isDryRun) {
+    await supabase.from('bv_emergency_alerts').insert({
+      subscriber_id: sub.id,
+      alert_type: 'tracker_sos',
+      location_lat: latitude ? parseFloat(String(latitude)) : null,
+      location_lng: longitude ? parseFloat(String(longitude)) : null,
+      location_name: gpsValid && latitude && longitude
+        ? `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+        : 'GPS-fix manglet (dryRun)',
+      contacts_notified: [],
+      call_ids: [],
+      status: 'dry_run',
+      metadata: {
+        source: 'tracker',
+        imei,
+        device_name: device.name,
+        voltage,
+        gps_valid: gpsValid,
+        dry_run: true,
+        tracker_received_at: receivedAt,
+      },
+    })
+    return NextResponse.json({
+      success: true,
+      mode: 'dry_run',
+      imei,
+      customer: sub.email,
+      would_notify: contacts.length,
+      message: `DRY RUN: Ville varslet ${contacts.length} kontakt(er) for ${sub.email}.`,
+    })
   }
 
   // 7. Bygg lokasjons-streng

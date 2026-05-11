@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 
 type Device = {
   imei: string
@@ -29,6 +29,19 @@ type TrackerEvent = {
   gps_valid: boolean
   cell_info: any
   received_at: string
+}
+
+type TrackerCommand = {
+  id: number
+  imei: string
+  command: string
+  command_type: string
+  status: 'pending' | 'sent' | 'acknowledged' | 'failed' | 'timeout' | 'cancelled'
+  response: string | null
+  payload: { description?: string } | null
+  created_at: string
+  sent_at: string | null
+  acknowledged_at: string | null
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string; emoji: string }> = {
@@ -98,6 +111,55 @@ export default function TrackereKlient({
   const criticalCount = useMemo(
     () => events.filter((e) => e.is_critical).length,
     [events]
+  )
+
+  // Command queue state
+  const [commands, setCommands] = useState<TrackerCommand[]>([])
+  const [sendingCommand, setSendingCommand] = useState<string | null>(null)
+
+  const fetchCommands = useCallback(async () => {
+    if (!selectedImei) return
+    try {
+      const res = await fetch(`/api/devices/${selectedImei}/command`)
+      if (res.ok) {
+        const data = await res.json()
+        setCommands(data.commands ?? [])
+      }
+    } catch (err) {
+      console.error('Klarte ikke å hente kommandoer:', err)
+    }
+  }, [selectedImei])
+
+  // Hent kommando-historikk når enhet velges + poll hver 3 sek
+  useEffect(() => {
+    fetchCommands()
+    const interval = setInterval(fetchCommands, 3000)
+    return () => clearInterval(interval)
+  }, [fetchCommands])
+
+  const sendCommand = useCallback(
+    async (command: string) => {
+      if (!selectedImei || sendingCommand) return
+      setSendingCommand(command)
+      try {
+        const res = await fetch(`/api/devices/${selectedImei}/command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command }),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          alert(`Feil: ${err.error || 'Ukjent feil'}`)
+        } else {
+          fetchCommands()
+        }
+      } catch (err) {
+        alert(`Klarte ikke å sende kommando: ${err}`)
+      } finally {
+        setTimeout(() => setSendingCommand(null), 800)
+      }
+    },
+    [selectedImei, sendingCommand, fetchCommands]
   )
 
   return (
@@ -371,6 +433,98 @@ export default function TrackereKlient({
                   )}
                 </div>
 
+                {/* Kommando-panel */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: 16,
+                  padding: 24,
+                  border: '1px solid rgba(10,42,61,0.08)',
+                }}>
+                  <h3 style={{
+                    fontSize: 16,
+                    margin: 0,
+                    marginBottom: 4,
+                  }}>
+                    Fjernstyr enhet
+                  </h3>
+                  <p style={{
+                    fontSize: 13,
+                    color: '#6b8fa3',
+                    marginTop: 0,
+                    marginBottom: 16,
+                  }}>
+                    Send kommandoer til enheten over åpen TCP-tilkobling. Krever at enheten er online.
+                  </p>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: 10,
+                    marginBottom: 20,
+                  }}>
+                    <CommandButton
+                      emoji="📍"
+                      label="Be om posisjon"
+                      description="Tving rapport NÅ"
+                      command="WHERE"
+                      sendingCommand={sendingCommand}
+                      onSend={sendCommand}
+                    />
+                    <CommandButton
+                      emoji="🔔"
+                      label="Pip (RING)"
+                      description="Skru på summer"
+                      command="RING,ON"
+                      sendingCommand={sendingCommand}
+                      onSend={sendCommand}
+                    />
+                    <CommandButton
+                      emoji="🔧"
+                      label="Les konfig"
+                      description="Hent alle innstillinger"
+                      command="RCONF"
+                      sendingCommand={sendingCommand}
+                      onSend={sendCommand}
+                    />
+                    <CommandButton
+                      emoji="🔄"
+                      label="Restart"
+                      description="Restart enheten"
+                      command="RST"
+                      sendingCommand={sendingCommand}
+                      onSend={sendCommand}
+                      confirm
+                    />
+                  </div>
+
+                  {/* Kommando-historikk */}
+                  {commands.length > 0 && (
+                    <div>
+                      <div style={{
+                        fontSize: 12,
+                        color: '#6b8fa3',
+                        fontWeight: 600,
+                        letterSpacing: 0.5,
+                        textTransform: 'uppercase',
+                        marginBottom: 8,
+                      }}>
+                        Siste kommandoer
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                        maxHeight: 280,
+                        overflowY: 'auto',
+                      }}>
+                        {commands.slice(0, 10).map((c) => (
+                          <CommandHistoryRow key={c.id} cmd={c} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Event-historikk */}
                 <div style={{
                   background: 'white',
@@ -511,6 +665,126 @@ function Stat({
           {sublabel}
         </div>
       )}
+    </div>
+  )
+}
+
+function CommandButton({
+  emoji,
+  label,
+  description,
+  command,
+  sendingCommand,
+  onSend,
+  confirm = false,
+}: {
+  emoji: string
+  label: string
+  description: string
+  command: string
+  sendingCommand: string | null
+  onSend: (cmd: string) => void
+  confirm?: boolean
+}) {
+  const isSending = sendingCommand === command
+  const handleClick = () => {
+    if (confirm && !window.confirm(`Sikker på at du vil sende "${command}" til enheten?`)) {
+      return
+    }
+    onSend(command)
+  }
+  return (
+    <button
+      onClick={handleClick}
+      disabled={isSending}
+      style={{
+        background: isSending ? '#22c55e' : 'white',
+        color: isSending ? 'white' : '#0a2a3d',
+        border: '1px solid ' + (isSending ? '#22c55e' : 'rgba(10,42,61,0.15)'),
+        borderRadius: 10,
+        padding: '12px 14px',
+        cursor: isSending ? 'wait' : 'pointer',
+        textAlign: 'left',
+        fontFamily: 'inherit',
+        transition: 'all 0.15s',
+        opacity: isSending ? 0.85 : 1,
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 4,
+      }}>
+        <span style={{ fontSize: 18 }}>{isSending ? '⏳' : emoji}</span>
+        <span style={{ fontSize: 14, fontWeight: 600 }}>
+          {isSending ? 'Sender...' : label}
+        </span>
+      </div>
+      <div style={{
+        fontSize: 11,
+        color: isSending ? 'rgba(255,255,255,0.85)' : '#6b8fa3',
+        marginLeft: 26,
+      }}>
+        {description} · <code style={{ fontFamily: 'monospace', fontSize: 10 }}>{command}</code>
+      </div>
+    </button>
+  )
+}
+
+const COMMAND_STATUS_COLORS: Record<string, { bg: string; fg: string; label: string }> = {
+  pending: { bg: '#fef3c7', fg: '#92400e', label: 'Venter' },
+  sent: { bg: '#dbeafe', fg: '#1e40af', label: 'Sendt' },
+  acknowledged: { bg: '#dcfce7', fg: '#166534', label: 'Bekreftet' },
+  failed: { bg: '#fee2e2', fg: '#991b1b', label: 'Feilet' },
+  timeout: { bg: '#f3f4f6', fg: '#6b7280', label: 'Timeout' },
+  cancelled: { bg: '#f3f4f6', fg: '#6b7280', label: 'Avbrutt' },
+}
+
+function CommandHistoryRow({ cmd }: { cmd: TrackerCommand }) {
+  const status = COMMAND_STATUS_COLORS[cmd.status] ?? COMMAND_STATUS_COLORS.pending
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr auto auto',
+      gap: 12,
+      alignItems: 'center',
+      padding: '10px 12px',
+      background: '#f9fafb',
+      borderRadius: 8,
+      fontSize: 13,
+    }}>
+      <div>
+        <div style={{ fontWeight: 600, fontFamily: 'monospace' }}>{cmd.command}</div>
+        {cmd.payload?.description && (
+          <div style={{ fontSize: 11, color: '#6b8fa3', marginTop: 2 }}>
+            {cmd.payload.description}
+          </div>
+        )}
+        {cmd.response && (
+          <div style={{
+            fontSize: 11,
+            color: '#22c55e',
+            fontFamily: 'monospace',
+            marginTop: 2,
+          }}>
+            ← {cmd.response}
+          </div>
+        )}
+      </div>
+      <div style={{
+        background: status.bg,
+        color: status.fg,
+        padding: '4px 10px',
+        borderRadius: 999,
+        fontSize: 11,
+        fontWeight: 600,
+      }}>
+        {status.label}
+      </div>
+      <div style={{ fontSize: 11, color: '#6b8fa3', fontFamily: 'monospace' }}>
+        {timeAgo(cmd.created_at)}
+      </div>
     </div>
   )
 }

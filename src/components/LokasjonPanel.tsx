@@ -51,7 +51,7 @@ function bestTime(hourly: HourlyPoint[]) {
 
 // Finn værsymbolet for timen nærmest nå (faller tilbake til første tilgjengelige).
 // hourly inneholder nøkkeltimene 06/09/12/15/18/21.
-function nowSymbol(hourly: HourlyPoint[]): string {
+export function nowSymbol(hourly: HourlyPoint[]): string {
   if (!hourly.length) return ''
   const nowHour = new Date().getHours()
   const withSymbol = hourly.filter(h => h.symbol)
@@ -65,7 +65,7 @@ function nowSymbol(hourly: HourlyPoint[]): string {
 }
 
 // Kort tekst-etikett for værsymbolet (for tilgjengelighet/tooltip).
-function weatherLabel(symbol: string): string {
+export function weatherLabel(symbol: string): string {
   const s = symbol.replace('_night', '').replace('_day', '').replace('_polartwilight', '')
   if (!s) return ''
   if (s === 'clearsky') return 'Klarvær'
@@ -158,7 +158,7 @@ function WaveAnimation() {
   )
 }
 
-function WeatherIcon({ symbol, size = 16 }: { symbol: string; size?: number }) {
+export function WeatherIcon({ symbol, size = 16 }: { symbol: string; size?: number }) {
   const s = symbol.replace('_night','').replace('_day','').replace('_polartwilight','')
   if (!s) return null
   // Solrik

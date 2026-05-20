@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import LokasjonPanel from '@/components/LokasjonPanel'
+import LokasjonPanel, { WeatherIcon, nowSymbol, weatherLabel } from '@/components/LokasjonPanel'
 import LeggTilLokasjon from '@/components/LeggTilLokasjon'
 import RapportTab from '@/components/RapportTab'
 import SosButton from '@/components/SosButton'
@@ -1464,12 +1464,22 @@ export default function MinSideClient() {
           const recCount = recs.filter(r=>r.location_id===selectedLoc.id).length
           const locRecs = recs.filter(r=>r.location_id===selectedLoc.id)
           const wd = selectedLocWeather
+          const detSymbol = wd?.hourly ? nowSymbol(wd.hourly) : ''
+          const detWeatherLabel = weatherLabel(detSymbol)
           return (
             <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
-              {/* Status-pille */}
-              <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#f8fbfc',borderRadius:100,alignSelf:'flex-start'}}>
-                <div style={{width:9,height:9,borderRadius:'50%',background:selectedLocScoreColor}}/>
-                <span style={{fontSize:13,fontWeight:500,color:selectedLocScoreColor}}>{selectedLocScoreLabel}</span>
+              {/* Status-pille + værforhold */}
+              <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#f8fbfc',borderRadius:100}}>
+                  <div style={{width:9,height:9,borderRadius:'50%',background:selectedLocScoreColor}}/>
+                  <span style={{fontSize:13,fontWeight:500,color:selectedLocScoreColor}}>{selectedLocScoreLabel}</span>
+                </div>
+                {detSymbol && (
+                  <div title={detWeatherLabel} style={{display:'flex',alignItems:'center',gap:7,padding:'10px 14px',background:'#f8fbfc',borderRadius:100}}>
+                    <WeatherIcon symbol={detSymbol} size={17} />
+                    <span style={{fontSize:13,fontWeight:500,color:'#0a2a3d'}}>{detWeatherLabel}</span>
+                  </div>
+                )}
               </div>
 
               {/* AI-oppsummering */}

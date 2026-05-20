@@ -9,6 +9,7 @@ import BvSelect from '@/components/BvSelect'
 import BvSheet from '@/components/BvSheet'
 import { KvitteringerSeksjon } from './KvitteringerSeksjon'
 import { planNavn, planPris } from '@/lib/plans'
+import { PushToggle } from './PushToggle'
 
 const S = {
   page: { minHeight:'100vh', background:'#e8f4f8', fontFamily:'DM Sans, sans-serif' } as React.CSSProperties,
@@ -1357,6 +1358,9 @@ export default function MinSideClient() {
 
               {/* Kvitteringer */}
               <KvitteringerSeksjon email={sub!.email} />
+
+              {/* Push-varsler (vises kun på enheter som støtter det) */}
+              <PushToggle email={sub!.email} />
 
               <div style={{padding:'0.75rem 1rem',background:'#f8fbfc',borderRadius:12}}>
                 <div style={{fontSize:'0.75rem',color:'#6b8fa3',marginBottom:'8px'}}>Abonnementsstatus</div>

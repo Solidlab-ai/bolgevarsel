@@ -6,7 +6,7 @@
 //   - Statiske ikoner/manifest: Cache-first
 //   - Offline-fallback: Havtema "Bølgevarsel er offline"
 
-const CACHE_VERSION = "bolgevarsel-v1";
+const CACHE_VERSION = "bolgevarsel-v2";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
@@ -182,4 +182,52 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
+});
+
+// ============================================
+// PUSH-VARSLER
+// ============================================
+
+// Mottar push fra serveren og viser varsel
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: "Bølgevarsel", body: event.data ? event.data.text() : "" };
+  }
+
+  const title = data.title || "Bølgevarsel";
+  const options = {
+    body: data.body || "",
+    icon: data.icon || "/icon0",
+    badge: "/favicon.svg",
+    tag: data.tag || "bolgevarsel-varsel",
+    data: { url: data.url || "/min-side" },
+    vibrate: [100, 50, 100],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Klikk på varsel: åpne appen (eller fokuser eksisterende vindu)
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/min-side";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      // Finnes et åpent vindu? Fokuser det
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      // Ellers åpne nytt
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
 });

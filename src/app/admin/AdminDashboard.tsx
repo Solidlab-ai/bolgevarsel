@@ -31,6 +31,7 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
   const [smsTo, setSmsTo] = useState('')
   const [smsText, setSmsText] = useState('')
   const [smsSending, setSmsSending] = useState(false)
+  const [kpiModal, setKpiModal] = useState<string | null>(null)
 
   const filtrert = subscribers.filter(s =>
     s.email.toLowerCase().includes(søk.toLowerCase())
@@ -67,6 +68,95 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
   async function oppdaterStatus(id: string, status: string) {
     await fetch('/api/admin/bruker', { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' }, body: JSON.stringify({ subscriber_id: id, field: 'status', value: status }) })
     window.location.reload()
+  }
+
+  // ── KPI-modal: data og innhold per boks ──────────────────────
+  const planNavn: Record<string, string> = { kyst: 'Basis', 'kyst-pluss': 'Standard', familie: 'Familie', pro: 'Pro' }
+  const fmtDato = (d: string | null) => d ? new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+  const betalingsnavn = (s: any) => s.payment_provider === 'vipps' ? 'Vipps' : 'Kort'
+
+  const startMnd = new Date(); startMnd.setDate(1); startMnd.setHours(0, 0, 0, 0)
+
+  const kpiData: Record<string, { tittel: string; forklaring?: string; kunder?: any[]; ekstra?: React.ReactNode }> = {
+    betalende: {
+      tittel: 'Betalende kunder',
+      forklaring: 'Aktive abonnenter pluss frosne (de har betalt og kan reaktivere). Trial og avsluttede er ikke med.',
+      kunder: subscribers.filter(s => s.status === 'active' || s.status === 'paused'),
+    },
+    trial: {
+      tittel: 'I prøveperiode',
+      forklaring: 'Kunder i 7 dagers gratis prøveperiode. De konverterer til betalende når perioden utløper.',
+      kunder: subscribers.filter(s => s.status === 'trialing'),
+    },
+    nye: {
+      tittel: 'Nye denne måneden',
+      forklaring: `Registrert siden 1. ${startMnd.toLocaleDateString('nb-NO', { month: 'long' })}.`,
+      kunder: subscribers.filter(s => s.created_at && new Date(s.created_at) >= startMnd),
+    },
+    avsluttet: {
+      tittel: 'Avsluttede abonnement',
+      forklaring: 'Kunder som har sagt opp eller blitt kansellert. Brukes for å følge churn.',
+      kunder: subscribers.filter(s => s.status === 'cancelled'),
+    },
+    pwa: {
+      tittel: 'PWA-installasjoner',
+      forklaring: 'Dette tallet er en proxy: antall enheter som har skrudd på push-varsler. På iPhone krever push at appen er installert på hjemskjermen, så det er et godt installasjonssignal — men ikke en eksakt teller. For helt nøyaktig tall kan vi legge til egen «display-mode: standalone»-sporing.',
+    },
+    mrr: {
+      tittel: 'Inntekt per måned (MRR)',
+      forklaring: 'Månedlig gjentakende inntekt fra aktive abonnenter, summert fra planprisene deres.',
+      kunder: subscribers.filter(s => s.status === 'active'),
+    },
+    sms: {
+      tittel: 'SMS-kostnad per måned',
+      forklaring: `Estimat: ${stats.totalMottakere} SMS-mottakere × 30 dager = ${stats.smsPrMnd} SMS/mnd, à 1,43 kr per SMS = ${Math.round(stats.smskostnad)} kr/mnd. Kun daglige SMS — farevarsler kommer i tillegg ved behov.`,
+    },
+    netto: {
+      tittel: 'Netto per måned',
+      forklaring: `Inntekt (${stats.inntekt} kr) minus estimert SMS-kostnad (${Math.round(stats.smskostnad)} kr) = ${Math.round(stats.netto)} kr/mnd. Merk: andre kostnader (Stripe/Vipps-gebyr, drift, API) er ikke trukket fra her.`,
+    },
+    miks: {
+      tittel: 'Betalingsmiks',
+      forklaring: `${stats.viaVipps} aktive betaler med Vipps, ${stats.viaKort} med kort.`,
+      kunder: subscribers.filter(s => s.status === 'active'),
+    },
+    lokasjoner: {
+      tittel: 'Lokasjoner som følges',
+      forklaring: 'Alle kystlokasjoner på tvers av abonnenter. Populære steder kan si noe om hvor markedet er.',
+      ekstra: (() => {
+        const teller: Record<string, number> = {}
+        subscribers.forEach(s => (s.bv_locations ?? []).forEach((l: any) => { teller[l.name] = (teller[l.name] ?? 0) + 1 }))
+        const sortert = Object.entries(teller).sort((a, b) => b[1] - a[1])
+        return (
+          <div>
+            {sortert.length === 0 && <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>Ingen lokasjoner ennå.</div>}
+            {sortert.map(([navn, antall]) => (
+              <div key={navn} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.9rem' }}>
+                <span style={{ color: 'rgba(255,255,255,0.85)' }}>📍 {navn}</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{antall}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })(),
+    },
+  }
+
+  function KpiKunderTabell({ kunder }: { kunder: any[] }) {
+    if (!kunder.length) return <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>Ingen kunder i denne kategorien akkurat nå.</div>
+    return (
+      <div>
+        {kunder.map(s => (
+          <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0', borderTop: '1px solid rgba(255,255,255,0.06)', gap: '0.5rem' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: 'white', fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.email}</div>
+              <div style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.4)' }}>{planNavn[s.plan] ?? s.plan} · {betalingsnavn(s)} · {fmtDato(s.created_at)}</div>
+            </div>
+            <span style={S.badge(s.status === 'active')}>{s.status}</span>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -122,22 +212,46 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
         </div>
       )}
 
+      {/* KPI-detalj modal */}
+      {kpiModal && kpiData[kpiModal] && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setKpiModal(null)}>
+          <div style={{ background: '#0d2d42', borderRadius: 20, padding: '1.8rem', border: '1px solid rgba(255,255,255,0.1)', width: 520, maxWidth: '95vw', maxHeight: '85vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem', gap: '1rem' }}>
+              <h3 style={{ margin: 0, fontFamily: "'Fraunces', Georgia, serif", fontWeight: 400, fontSize: '1.3rem', color: 'white' }}>{kpiData[kpiModal].tittel}</h3>
+              <button onClick={() => setKpiModal(null)} style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: 'none', borderRadius: 100, width: 30, height: 30, cursor: 'pointer', fontSize: '1.1rem', flexShrink: 0, lineHeight: 1 }}>×</button>
+            </div>
+            {kpiData[kpiModal].forklaring && (
+              <p style={{ margin: '0 0 1.2rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '0.9rem 1.1rem' }}>{kpiData[kpiModal].forklaring}</p>
+            )}
+            {kpiData[kpiModal].ekstra}
+            {kpiData[kpiModal].kunder && (
+              <>
+                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.2rem' }}>{kpiData[kpiModal].kunder!.length} kunder</div>
+                <KpiKunderTabell kunder={kpiData[kpiModal].kunder!} />
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={S.wrap}>
-        {/* KPI: VEKST & KUNDER */}
         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Vekst & kunder</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
-            { label: 'Betalende', verdi: stats.betalende, farge: '#4ade80', sub: `${stats.aktive} aktive · ${stats.paused} frosne` },
-            { label: 'I prøveperiode', verdi: stats.trialing, farge: '#fbbf24', sub: '7 dagers gratis' },
-            { label: 'Nye denne mnd', verdi: stats.nyeDenneMnd, farge: '#4da8cc', sub: 'siden 1. i mnd' },
-            { label: 'Avsluttet', verdi: stats.cancelled, farge: '#f87171', sub: 'churn totalt' },
-            { label: 'PWA-installasjoner', verdi: stats.pushSubs, farge: '#a78bfa', sub: 'push-abonnenter (proxy)' },
+            { id: 'betalende', label: 'Betalende', verdi: stats.betalende, farge: '#4ade80', sub: `${stats.aktive} aktive · ${stats.paused} frosne` },
+            { id: 'trial', label: 'I prøveperiode', verdi: stats.trialing, farge: '#fbbf24', sub: '7 dagers gratis' },
+            { id: 'nye', label: 'Nye denne mnd', verdi: stats.nyeDenneMnd, farge: '#4da8cc', sub: 'siden 1. i mnd' },
+            { id: 'avsluttet', label: 'Avsluttet', verdi: stats.cancelled, farge: '#f87171', sub: 'churn totalt' },
+            { id: 'pwa', label: 'PWA-installasjoner', verdi: stats.pushSubs, farge: '#a78bfa', sub: 'push-abonnenter (proxy)' },
           ].map(s => (
-            <div key={s.label} style={S.statCard}>
+            <button key={s.label} onClick={() => setKpiModal(s.id)}
+              style={{ ...S.statCard, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'border-color 0.15s, transform 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'none' }}>
               <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 300, color: s.farge }}>{s.verdi}</div>
-              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub}</div>
-            </div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub} ›</div>
+            </button>
           ))}
         </div>
 
@@ -145,17 +259,20 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Økonomi & bruk</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
-            { label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `snitt ${stats.snittPerKunde} kr/kunde` },
-            { label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.smsPrMnd} SMS/mnd` },
-            { label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171', sub: 'inntekt − SMS' },
-            { label: 'Betalingsmiks', verdi: `${stats.viaVipps} / ${stats.viaKort}`, farge: '#60a5fa', sub: 'Vipps / kort' },
-            { label: 'Lokasjoner', verdi: stats.totalLokasjoner, farge: '#7dd3fc', sub: `${stats.totalMottakere} SMS-mottakere` },
+            { id: 'mrr', label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `snitt ${stats.snittPerKunde} kr/kunde` },
+            { id: 'sms', label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.smsPrMnd} SMS/mnd` },
+            { id: 'netto', label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171', sub: 'inntekt − SMS' },
+            { id: 'miks', label: 'Betalingsmiks', verdi: `${stats.viaVipps} / ${stats.viaKort}`, farge: '#60a5fa', sub: 'Vipps / kort' },
+            { id: 'lokasjoner', label: 'Lokasjoner', verdi: stats.totalLokasjoner, farge: '#7dd3fc', sub: `${stats.totalMottakere} SMS-mottakere` },
           ].map(s => (
-            <div key={s.label} style={S.statCard}>
+            <button key={s.label} onClick={() => setKpiModal(s.id)}
+              style={{ ...S.statCard, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'border-color 0.15s, transform 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'none' }}>
               <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 300, color: s.farge }}>{s.verdi}</div>
-              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub}</div>
-            </div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub} ›</div>
+            </button>
           ))}
         </div>
 

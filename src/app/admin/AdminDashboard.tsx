@@ -16,8 +16,9 @@ type Props = {
   stats: {
     aktive: number; inntekt: number; smskostnad: number; netto: number; smsPrMnd: number; totalMottakere: number
     trialing: number; betalende: number; paused: number; cancelled: number
+    inaktive: number; churned: number; dagligSmsMottakere: number
     nyeDenneMnd: number; viaVipps: number; viaKort: number; snittPerKunde: number
-    pushSubs: number; totalLokasjoner: number
+    pushSubs: number; totalLokasjoner: number; antallTest: number
   }
   planTelling: any[]
 }
@@ -71,32 +72,41 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
   }
 
   // ── KPI-modal: data og innhold per boks ──────────────────────
-  const planNavn: Record<string, string> = { kyst: 'Basis', 'kyst-pluss': 'Standard', familie: 'Familie', pro: 'Pro' }
+  const planNavn: Record<string, string> = { kyst: 'Basis', 'kyst-pluss': 'Standard', familie: 'Familie', pro: 'Pro', sikkerhet: 'Sikkerhet' }
   const fmtDato = (d: string | null) => d ? new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
   const betalingsnavn = (s: any) => s.payment_provider === 'vipps' ? 'Vipps' : 'Kort'
+
+  // Samme test-gjenkjenning som i page.tsx — KPI-lister skal kun vise ekte kunder
+  const erTest = (email: string) => {
+    if (!email) return false
+    const e = email.toLowerCase()
+    return e.includes('+test') || e.includes('+tester') || e.includes('+vippser') ||
+      e.endsWith('@ulrik.biz') || e.startsWith('prod-smoke') || e.endsWith('@bolgevarsel.no')
+  }
+  const ekte = subscribers.filter(s => !erTest(s.email))
 
   const startMnd = new Date(); startMnd.setDate(1); startMnd.setHours(0, 0, 0, 0)
 
   const kpiData: Record<string, { tittel: string; forklaring?: string; kunder?: any[]; ekstra?: React.ReactNode }> = {
     betalende: {
       tittel: 'Betalende kunder',
-      forklaring: 'Aktive abonnenter pluss frosne (de har betalt og kan reaktivere). Trial og avsluttede er ikke med.',
-      kunder: subscribers.filter(s => s.status === 'active' || s.status === 'paused'),
+      forklaring: 'Aktive abonnenter pluss frosne (de har en levende betalingsavtale). Trial, deaktiverte og avsluttede er ikke med. Kun ekte kunder — testkontoer er filtrert bort.',
+      kunder: ekte.filter(s => s.status === 'active' || s.status === 'paused'),
     },
     trial: {
       tittel: 'I prøveperiode',
-      forklaring: 'Kunder i 7 dagers gratis prøveperiode. De konverterer til betalende når perioden utløper.',
-      kunder: subscribers.filter(s => s.status === 'trialing'),
+      forklaring: 'Ekte kunder i 7 dagers gratis prøveperiode. De konverterer til betalende når perioden utløper.',
+      kunder: ekte.filter(s => s.status === 'trialing'),
     },
     nye: {
       tittel: 'Nye denne måneden',
-      forklaring: `Registrert siden 1. ${startMnd.toLocaleDateString('nb-NO', { month: 'long' })}.`,
-      kunder: subscribers.filter(s => s.created_at && new Date(s.created_at) >= startMnd),
+      forklaring: `Ekte kunder registrert siden 1. ${startMnd.toLocaleDateString('nb-NO', { month: 'long' })}.`,
+      kunder: ekte.filter(s => s.created_at && new Date(s.created_at) >= startMnd),
     },
     avsluttet: {
-      tittel: 'Avsluttede abonnement',
-      forklaring: 'Kunder som har sagt opp eller blitt kansellert. Brukes for å følge churn.',
-      kunder: subscribers.filter(s => s.status === 'cancelled'),
+      tittel: 'Avsluttet / churn',
+      forklaring: 'Ekte kunder som har sagt opp (cancelled) eller blitt deaktivert (inactive). Begge teller som tapt kunde.',
+      kunder: ekte.filter(s => s.status === 'cancelled' || s.status === 'inactive'),
     },
     pwa: {
       tittel: 'PWA-installasjoner',
@@ -104,28 +114,28 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
     },
     mrr: {
       tittel: 'Inntekt per måned (MRR)',
-      forklaring: 'Månedlig gjentakende inntekt fra aktive abonnenter, summert fra planprisene deres.',
-      kunder: subscribers.filter(s => s.status === 'active'),
+      forklaring: 'Månedlig gjentakende inntekt fra aktive ekte kunder, summert fra LISTEPRISENE deres. ⚠️ Viktig: rabattkoder (BETATESTER, BETA2026 osv.) ligger i Stripe og er IKKE trukket fra her — flere beta-/vennekunder betaler trolig 0 kr. Reell inntekt er derfor lavere. For eksakt MRR må vi hente faktisk fakturert beløp fra Stripe.',
+      kunder: ekte.filter(s => s.status === 'active'),
     },
     sms: {
       tittel: 'SMS-kostnad per måned',
-      forklaring: `Estimat: ${stats.totalMottakere} SMS-mottakere × 30 dager = ${stats.smsPrMnd} SMS/mnd, à 1,43 kr per SMS = ${Math.round(stats.smskostnad)} kr/mnd. Kun daglige SMS — farevarsler kommer i tillegg ved behov.`,
+      forklaring: `Estimat basert på DAGLIG SMS (det som faktisk koster hver dag): ${stats.dagligSmsMottakere} mottakere med daglig SMS × 30 dager = ${stats.smsPrMnd} SMS/mnd, à 1,43 kr = ${Math.round(stats.smskostnad)} kr/mnd. Farevarsel-SMS sendes sjelden og er ikke med i estimatet. (${stats.totalMottakere} mottakere kan få farevarsel, men kun ${stats.dagligSmsMottakere} har daglig SMS på.)`,
     },
     netto: {
       tittel: 'Netto per måned',
-      forklaring: `Inntekt (${stats.inntekt} kr) minus estimert SMS-kostnad (${Math.round(stats.smskostnad)} kr) = ${Math.round(stats.netto)} kr/mnd. Merk: andre kostnader (Stripe/Vipps-gebyr, drift, API) er ikke trukket fra her.`,
+      forklaring: `Listepris-inntekt (${stats.inntekt} kr) minus estimert daglig-SMS-kostnad (${Math.round(stats.smskostnad)} kr) = ${Math.round(stats.netto)} kr/mnd. ⚠️ Rabattkoder er ikke trukket fra inntekten, og gebyrer (Stripe/Vipps), drift og API-kostnader er ikke med. Tallet er et grovt overslag.`,
     },
     miks: {
       tittel: 'Betalingsmiks',
-      forklaring: `${stats.viaVipps} aktive betaler med Vipps, ${stats.viaKort} med kort.`,
-      kunder: subscribers.filter(s => s.status === 'active'),
+      forklaring: `Av ekte aktive kunder betaler ${stats.viaVipps} med Vipps og ${stats.viaKort} med kort.`,
+      kunder: ekte.filter(s => s.status === 'active'),
     },
     lokasjoner: {
       tittel: 'Lokasjoner som følges',
-      forklaring: 'Alle kystlokasjoner på tvers av abonnenter. Populære steder kan si noe om hvor markedet er.',
+      forklaring: 'Kystlokasjoner blant ekte kunder (testkontoer er filtrert bort). Populære steder kan si noe om hvor markedet er.',
       ekstra: (() => {
         const teller: Record<string, number> = {}
-        subscribers.forEach(s => (s.bv_locations ?? []).forEach((l: any) => { teller[l.name] = (teller[l.name] ?? 0) + 1 }))
+        ekte.forEach(s => (s.bv_locations ?? []).forEach((l: any) => { teller[l.name] = (teller[l.name] ?? 0) + 1 }))
         const sortert = Object.entries(teller).sort((a, b) => b[1] - a[1])
         return (
           <div>
@@ -235,13 +245,17 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
       )}
 
       <div style={S.wrap}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>📊 KPIene viser <strong style={{ color: 'rgba(255,255,255,0.8)' }}>kun ekte kunder</strong>.</span>
+          <span style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.45)', padding: '2px 10px', borderRadius: 100, fontSize: '0.72rem' }}>{stats.antallTest} testkontoer filtrert bort</span>
+        </div>
         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Vekst & kunder</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
             { id: 'betalende', label: 'Betalende', verdi: stats.betalende, farge: '#4ade80', sub: `${stats.aktive} aktive · ${stats.paused} frosne` },
             { id: 'trial', label: 'I prøveperiode', verdi: stats.trialing, farge: '#fbbf24', sub: '7 dagers gratis' },
             { id: 'nye', label: 'Nye denne mnd', verdi: stats.nyeDenneMnd, farge: '#4da8cc', sub: 'siden 1. i mnd' },
-            { id: 'avsluttet', label: 'Avsluttet', verdi: stats.cancelled, farge: '#f87171', sub: 'churn totalt' },
+            { id: 'avsluttet', label: 'Avsluttet / churn', verdi: stats.churned, farge: '#f87171', sub: `${stats.cancelled} oppsagt · ${stats.inaktive} deaktivert` },
             { id: 'pwa', label: 'PWA-installasjoner', verdi: stats.pushSubs, farge: '#a78bfa', sub: 'push-abonnenter (proxy)' },
           ].map(s => (
             <button key={s.label} onClick={() => setKpiModal(s.id)}
@@ -259,8 +273,8 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Økonomi & bruk</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
-            { id: 'mrr', label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `snitt ${stats.snittPerKunde} kr/kunde` },
-            { id: 'sms', label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.smsPrMnd} SMS/mnd` },
+            { id: 'mrr', label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `listepris · snitt ${stats.snittPerKunde} kr` },
+            { id: 'sms', label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.dagligSmsMottakere} daglig-SMS · ${stats.smsPrMnd}/mnd` },
             { id: 'netto', label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171', sub: 'inntekt − SMS' },
             { id: 'miks', label: 'Betalingsmiks', verdi: `${stats.viaVipps} / ${stats.viaKort}`, farge: '#60a5fa', sub: 'Vipps / kort' },
             { id: 'lokasjoner', label: 'Lokasjoner', verdi: stats.totalLokasjoner, farge: '#7dd3fc', sub: `${stats.totalMottakere} SMS-mottakere` },

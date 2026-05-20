@@ -3,17 +3,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { gaPurchaseEvent } from '@/lib/ga'
-import { getPlanById } from '@/lib/plans'
+import { getPlanById, planNavn as planNavnFn, planPris as planPrisFn } from '@/lib/plans'
 import { createInvoice, sendInvoiceEmail } from '@/lib/invoices'
 
 const RESEND_KEY = process.env.RESEND_API_KEY!
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bolgevarsel.no'
 
 async function sendWelcomeEmail(email: string, plan: string, loginLink: string) {
-  const planNavn: Record<string, string> = { kyst: 'Kyst', familie: 'Familie', pro: 'Pro' }
-  const planPris: Record<string, string> = { kyst: '49', familie: '179', pro: '299' }
-  const navn = planNavn[plan] || plan
-  const pris = planPris[plan] || '–'
+  const navn = planNavnFn(plan)
+  const pris = planPrisFn(plan)?.toString() ?? '–'
 
   await fetch('https://api.resend.com/emails', {
     method: 'POST',

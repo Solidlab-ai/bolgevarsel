@@ -2,6 +2,12 @@ export const dynamic = 'force-dynamic'
 import { Suspense } from 'react'
 import MinSideClient from './MinSideClient'
 
+export const metadata = {
+  title: 'Min side – Logg inn',
+  description: 'Logg inn på Min side for å administrere abonnement, lokasjoner og mottakere.',
+  robots: { index: false, follow: false },
+}
+
 export default function MinSide() {
   return (
     <Suspense fallback={

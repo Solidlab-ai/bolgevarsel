@@ -62,7 +62,7 @@ export default function Pricing() {
         <span className={styles.label}>Priser</span>
         <h2 className={styles.title}>Enkle, transparente<br/>abonnementer</h2>
         <div className={styles.plans}>
-          {PLANS.map((plan) => {
+          {PLANS.filter((plan) => !plan.hidden).map((plan) => {
             const isSelected = selectedPlan === plan.id
             return (
               <button

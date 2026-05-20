@@ -26,7 +26,7 @@ export default function Kjopsvilkar() {
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Bølgevarsel.no er en abonnementstjeneste som leverer daglige bølge- og værvarsler for kystlokasjoner i Norge på e-post og SMS. Tjenesten leveres av Solidlab.ai (Stå på Pinne AS), organisasjonsnummer 935 233 488, Tunveien 13, 4016 Stavanger.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>2. Priser og pakker</h2>
-        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Vi tilbyr tre abonnementspakker: Kyst (49 kr/mnd), Familie (179 kr/mnd) og Pro (299 kr/mnd). Alle priser er inkludert mva. Funksjonsoversikt for hver pakke vises på <a href="/#pris" style={{color:'#1a6080'}}>prisesiden</a>.</p>
+        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Vi tilbyr tre abonnementspakker: Basis (49 kr/mnd), Standard (99 kr/mnd) og Familie (199 kr/mnd). Alle priser er inkludert mva. Funksjonsoversikt for hver pakke vises på <a href="/#pris" style={{color:'#1a6080'}}>prisesiden</a>.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>3. Gratis prøveperiode</h2>
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Nye kunder får 7 dagers gratis prøveperiode. Du må oppgi gyldig betalingskort ved registrering, men kortet belastes ikke før prøveperioden er over. Sier du opp før prøveperioden er ferdig, blir du ikke belastet.</p>
@@ -55,7 +55,7 @@ export default function Kjopsvilkar() {
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>11. Kontakt</h2>
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Spørsmål om abonnementet? Send e-post til <a href="mailto:hei@bolgevarsel.no" style={{color:'#1a6080'}}>hei@bolgevarsel.no</a> eller besøk <a href="/hjelp" style={{color:'#1a6080'}}>hjelpesenteret</a>.</p>
 
-        <p style={{color:'#6b8fa3',marginTop:'3rem',fontSize:'0.9rem'}}>Sist oppdatert: mai 2026</p>
+        <p style={{color:'#6b8fa3',marginTop:'3rem',fontSize:'0.9rem'}}>Sist oppdatert: 20. mai 2026</p>
       </div>
     </div>
   )

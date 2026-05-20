@@ -8,6 +8,7 @@ import SosCountdownModal from '@/components/SosCountdownModal'
 import BvSelect from '@/components/BvSelect'
 import BvSheet from '@/components/BvSheet'
 import { KvitteringerSeksjon } from './KvitteringerSeksjon'
+import { planNavn, planPris } from '@/lib/plans'
 
 const S = {
   page: { minHeight:'100vh', background:'#e8f4f8', fontFamily:'DM Sans, sans-serif' } as React.CSSProperties,
@@ -377,7 +378,7 @@ export default function MinSideClient() {
     if (d.recipient) { setRecs(recs.map(r=>r.id===editRec.id ? d.recipient : r)); setEditRec(null) }
   }
 
-  const planLabel: Record<string,string> = { kyst:'Kyst', familie:'Familie', pro:'Pro', sikkerhet:'Sikkerhet' }
+  const planLabel: Record<string,string> = { kyst:planNavn('kyst'), 'kyst-pluss':planNavn('kyst-pluss'), familie:planNavn('familie'), pro:planNavn('pro'), sikkerhet:planNavn('sikkerhet') }
 
   // LOGIN VIEW
   if (view==='login') return (
@@ -433,7 +434,8 @@ export default function MinSideClient() {
               <h1 style={{fontFamily:"'Fraunces', Georgia, serif",fontSize:'2rem',fontWeight:300,color:'#0a2a3d',marginBottom:'0.4rem'}}>Min side</h1>
               <p style={{color:'#6b8fa3',marginBottom:'1.5rem',fontSize:'0.95rem'}}>Skriv inn e-posten din — vi sender deg en innloggingslenke</p>
               <form onSubmit={login} style={{display:'flex',flexDirection:'column',gap:'0.7rem'}}>
-                <input style={{...S.inp, background:'rgba(248,251,252,0.9)'}} type="email" placeholder="din@epost.no" value={email} onChange={e=>setEmail(e.target.value)} required autoFocus />
+                <label htmlFor="login-epost" style={{position:'absolute',width:1,height:1,padding:0,margin:-1,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0}}>E-postadresse</label>
+                <input id="login-epost" name="email" style={{...S.inp, background:'rgba(248,251,252,0.9)'}} type="email" inputMode="email" autoComplete="email" placeholder="din@epost.no" value={email} onChange={e=>setEmail(e.target.value)} required autoFocus />
                 {feil && <p style={{color:'#ef4444',fontSize:'0.85rem',margin:0}}>{feil}</p>}
                 <button style={{...S.btnPrimary,width:'100%',padding:'0.9rem',fontSize:'0.95rem'}} disabled={loading}>
                   {loading ? 'Sender...' : 'Send innloggingslenke →'}
@@ -575,8 +577,8 @@ export default function MinSideClient() {
               <div style={{background:'#f8fbfc',borderRadius:10,padding:'10px 12px',marginBottom:10}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
                   <div>
-                    <div style={{fontSize:13,fontWeight:500,color:'#0a2a3d'}}>{({'kyst':'Kyst-plan','kyst-pluss':'Kyst+ plan','familie':'Familie-plan','pro':'Pro-plan','sikkerhet':'Sikkerhet-plan'}[sub!.plan]||sub!.plan)}</div>
-                    <div style={{fontSize:11,color:'#6b8fa3'}}>{({'kyst':'49','kyst-pluss':'78','familie':'179','pro':'299','sikkerhet':'499'}[sub!.plan]||'—')} kr/mnd</div>
+                    <div style={{fontSize:13,fontWeight:500,color:'#0a2a3d'}}>{planNavn(sub!.plan)}-plan</div>
+                    <div style={{fontSize:11,color:'#6b8fa3'}}>{planPris(sub!.plan) ?? '—'} kr/mnd</div>
                   </div>
                   <span style={{fontSize:12,fontWeight:500,padding:'4px 10px',borderRadius:100,background:'#e8f5ed',color:'#16a34a'}}>{sub!.status==='active'?'Aktivt':'Pauset'}</span>
                 </div>

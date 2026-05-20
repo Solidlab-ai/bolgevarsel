@@ -113,7 +113,6 @@ const KATEGORIER = [
       { slug: 'flere-lokasjoner', tittel: 'Kan jeg ha flere lokasjoner?' },
       { slug: 'datakilder', tittel: 'Hvilke datakilder bruker dere?' },
       { slug: 'aktivitetsprofil-sms', tittel: 'Hva betyr aktivitetsprofil på SMS?' },
-      { slug: 'aktivitetsprofil-sms', tittel: 'Hva betyr aktivitetsprofil på SMS?' },
     ],
   },
 ]
@@ -131,7 +130,7 @@ export default function HjelpPage() {
             { '@type': 'Question', name: 'Når sendes varselet?', acceptedAnswer: { '@type': 'Answer', text: 'Standard er kl. 12:00, men du velger selv mellom 04:00 og 12:00 — per abonnement eller per mottaker.' } },
             { '@type': 'Question', name: 'Hvilke lokasjoner støttes?', acceptedAnswer: { '@type': 'Answer', text: 'Vi støtter hele norskekysten via Open-Meteo Marine API og met.no.' } },
             { '@type': 'Question', name: 'Kan jeg ha flere mottakere?', acceptedAnswer: { '@type': 'Answer', text: 'Ja, du kan ha opptil 5 mottakere per lokasjon — for eksempel deg selv, ektefelle og svigerforeldre.' } },
-            { '@type': 'Question', name: 'Hva koster det?', acceptedAnswer: { '@type': 'Answer', text: 'Vi tilbyr tre planer: Kyst (49 kr/mnd, kun e-post), Familie (179 kr/mnd, SMS til opptil 4) og Pro (299 kr/mnd, opptil 5 mottakere og 3 lokasjoner).' } },
+            { '@type': 'Question', name: 'Hva koster det?', acceptedAnswer: { '@type': 'Answer', text: 'Vi tilbyr tre planer: Basis (49 kr/mnd, kun e-post), Standard (99 kr/mnd, SMS-farevarsel til deg) og Familie (199 kr/mnd, SMS til opptil 5 mottakere og 3 lokasjoner).' } },
           ]
         }) }}
       />

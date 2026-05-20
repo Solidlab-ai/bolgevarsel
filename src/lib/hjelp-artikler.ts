@@ -41,17 +41,17 @@ export const ARTIKLER: Record<string, Artikkel> = {
 <th style="padding:10px;text-align:left;border-bottom:2px solid #e2e8f0">SMS</th>
 </tr></thead>
 <tbody>
-<tr><td style="padding:10px;border-bottom:1px solid #f1f5f9"><strong>Kyst</strong></td><td style="padding:10px;border-bottom:1px solid #f1f5f9">49 kr/mnd</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">1</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">Kun e-post</td></tr>
-<tr><td style="padding:10px;border-bottom:1px solid #f1f5f9"><strong>Familie</strong></td><td style="padding:10px;border-bottom:1px solid #f1f5f9">179 kr/mnd</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">3</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">Opptil 5 mottakere</td></tr>
-<tr><td style="padding:10px"><strong>Pro</strong></td><td style="padding:10px">299 kr/mnd</td><td style="padding:10px">5</td><td style="padding:10px">Opptil 5 mottakere</td></tr>
+<tr><td style="padding:10px;border-bottom:1px solid #f1f5f9"><strong>Basis</strong></td><td style="padding:10px;border-bottom:1px solid #f1f5f9">49 kr/mnd</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">1</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">Kun e-post</td></tr>
+<tr><td style="padding:10px;border-bottom:1px solid #f1f5f9"><strong>Standard</strong></td><td style="padding:10px;border-bottom:1px solid #f1f5f9">99 kr/mnd</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">1</td><td style="padding:10px;border-bottom:1px solid #f1f5f9">SMS-farevarsel til deg</td></tr>
+<tr><td style="padding:10px"><strong>Familie</strong></td><td style="padding:10px">199 kr/mnd</td><td style="padding:10px">3</td><td style="padding:10px">Opptil 5 mottakere</td></tr>
 </tbody>
 </table>
-<h2>Velg Kyst hvis du...</h2>
-<ul><li>Bare trenger e-postvarsler til deg selv</li><li>Har opp til tre kyststeder du vil følge</li><li>Er ny og vil prøve tjenesten til en lav pris</li></ul>
+<h2>Velg Basis hvis du...</h2>
+<ul><li>Bare trenger e-postvarsler til deg selv</li><li>Vil følge ett fast kyststed</li><li>Er ny og vil prøve tjenesten til en lav pris</li></ul>
+<h2>Velg Standard hvis du...</h2>
+<ul><li>Vil ha kritisk farevarsel på SMS ved kuling og storm</li><li>Ferdes alene på sjøen og vil ha ekstra trygghet</li><li>Er hyttefolk eller hobby-fisker med ett fast farvann</li></ul>
 <h2>Velg Familie hvis du...</h2>
-<ul><li>Vil at hele familien skal få SMS-varsler</li><li>Har én fast lokasjon (f.eks. hytta)</li><li>Vil inkludere barn, ektefelle eller foreldre</li></ul>
-<h2>Velg Pro hvis du...</h2>
-<ul><li>Trenger varsler for flere lokasjoner med SMS</li><li>Er båteier med ulike farvann</li><li>Ønsker maksimal fleksibilitet</li></ul>
+<ul><li>Vil at hele familien skal få SMS-varsler — opptil 5 personer</li><li>Har flere lokasjoner (hytta, hjemsted, favorittspot)</li><li>Vil inkludere barn, ektefelle eller foreldre</li></ul>
 `,
   },
 
@@ -91,9 +91,9 @@ export const ARTIKLER: Record<string, Artikkel> = {
 <p>Vi bruker koordinatene fra stedsnavnet du velger. Jo mer spesifikt sted du søker, desto mer nøyaktige blir værdataene. For en hytte i en vik kan det lønne seg å søke på det nærmeste tettstedet.</p>
 <h2>Antall lokasjoner per plan</h2>
 <ul>
-<li><strong>Kyst:</strong> 1 lokasjon</li>
+<li><strong>Basis:</strong> 1 lokasjon</li>
+<li><strong>Standard:</strong> 1 lokasjon</li>
 <li><strong>Familie:</strong> opptil 3 lokasjoner</li>
-<li><strong>Pro:</strong> opptil 5 lokasjoner</li>
 </ul>
 <p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 <strong>Tips:</strong> Du må legge til minst én lokasjon før du kan legge til mottakere.</p>
 `,
@@ -179,9 +179,9 @@ Bestefar,004747123456,bestefar@mail.no,ja</pre>
 <p>Velg en aktivitetsprofil (surfer, seiler, fisker osv.) for å få en skreddersydd vurdering av forholdene — i både SMS og e-post.</p>
 <h2>Antall mottakere per plan</h2>
 <ul>
-<li><strong>Kyst:</strong> Ingen SMS — kun e-post til deg</li>
+<li><strong>Basis:</strong> Ingen SMS — kun e-post til deg</li>
+<li><strong>Standard:</strong> SMS-farevarsel til deg (1 mottaker)</li>
 <li><strong>Familie:</strong> opptil 5 mottakere</li>
-<li><strong>Pro:</strong> opptil 5 mottakere</li>
 </ul>
 <h2>Pause eller slett mottaker</h2>
 <p>Du kan pause en mottaker midlertidig (de får ingen varsler) eller slette dem helt. Kritisk farevarsel stoppes ikke av pause.</p>
@@ -434,9 +434,9 @@ bolgevarsel.no
     html: `
 <p>Ja! Antall lokasjoner avhenger av abonnementsplanen din:</p>
 <ul>
-<li><strong>Kyst:</strong> opptil 3 lokasjoner (kun e-post)</li>
-<li><strong>Familie:</strong> 1 lokasjon</li>
-<li><strong>Pro:</strong> opptil 3 lokasjoner med SMS</li>
+<li><strong>Basis:</strong> 1 lokasjon (kun e-post)</li>
+<li><strong>Standard:</strong> 1 lokasjon (med SMS-farevarsel)</li>
+<li><strong>Familie:</strong> opptil 3 lokasjoner med SMS</li>
 </ul>
 <h2>Varsler for flere lokasjoner</h2>
 <p>Hvis du har flere lokasjoner får du én samlet e-postrapport med alle stedene, og én samlet SMS per mottaker med informasjon om alle aktive lokasjoner.</p>

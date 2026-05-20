@@ -12,13 +12,14 @@ export type Plan = {
   lokasjoner: number
   mottakere: number
   smsEnabled: boolean
+  hidden?: boolean
   features: string[]
 }
 
 export const PLANS: Plan[] = [
   {
     id: 'kyst',
-    name: 'Kyst',
+    name: 'Basis',
     price: 49,
     priceId: 'price_1TIn0GDF2t9Ys3TQxchu6W2q',
     featured: false,
@@ -26,6 +27,7 @@ export const PLANS: Plan[] = [
     mottakere: 0,
     smsEnabled: false,
     features: [
+      'Tilgang til Min side — full kontroll over varsler og profil',
       'Rapportgenerator — generer rapport på forespørsel',
       'Daglig e-postrapport til deg — kl. du bestemmer',
       'Bølgehøyde, vind, periode og sjøtemperatur',
@@ -36,15 +38,16 @@ export const PLANS: Plan[] = [
   },
   {
     id: 'kyst-pluss',
-    name: 'Kyst+',
-    price: 78,
+    name: 'Standard',
+    price: 99,
     priceId: 'price_1TVUsSDF2t9Ys3TQJr8tCGts',
     featured: false,
     lokasjoner: 1,
     mottakere: 1,
     smsEnabled: true,
     features: [
-      'Alt i Kyst-pakken',
+      'Tilgang til Min side — full kontroll over varsler og profil',
+      'Alt i Basis-pakken',
       'Kritisk farevarsel via SMS — ved kuling og storm',
       'Trygghet på sjøen for deg og din familie',
       'SMS sendes umiddelbart når farevarsel utstedes',
@@ -55,13 +58,14 @@ export const PLANS: Plan[] = [
   {
     id: 'familie',
     name: 'Familie',
-    price: 179,
+    price: 199,
     priceId: 'price_1TInAnDF2t9Ys3TQJLe4tkWR',
     featured: true,
     lokasjoner: 3,
     mottakere: 5,
     smsEnabled: true,
     features: [
+      'Tilgang til Min side — full kontroll over varsler og profil',
       'Rapportgenerator — sjekk opptil 7 dager frem',
       'SMS-varsel til hele familien — opptil 5 personer',
       'Opptil 3 kyststeder (hytta, hjemsted, favorittspot)',
@@ -77,10 +81,12 @@ export const PLANS: Plan[] = [
     price: 299,
     priceId: 'price_1TIn6ZDF2t9Ys3TQNGP7Rmce',
     featured: false,
+    hidden: true,
     lokasjoner: 5,
     mottakere: 5,
     smsEnabled: true,
     features: [
+      'Tilgang til Min side — full kontroll over varsler og profil',
       'Rapportgenerator — flerdag AI-analyse opptil 7 dager',
       'Opptil 5 kyststeder langs hele norskekysten',
       'SMS til opptil 5 mottakere med ulike profiler',
@@ -95,3 +101,17 @@ export const PLANS: Plan[] = [
 // Hjelpefunksjoner
 export const getPlanById = (id: string) => PLANS.find(p => p.id === id)
 export const getPlanByPriceId = (priceId: string) => PLANS.find(p => p.priceId === priceId)
+
+// Legacy/utgåtte planer som fortsatt finnes i databasen, men ikke selges lenger.
+// Brukes kun for å vise riktig navn/pris til eksisterende abonnenter.
+const LEGACY_PLANS: Record<string, { name: string; price: number }> = {
+  sikkerhet: { name: 'Sikkerhet', price: 499 },
+}
+
+// Visningsnavn for en plan-id (både aktive og legacy). Faller tilbake til id-en selv.
+export const planNavn = (id: string): string =>
+  getPlanById(id)?.name ?? LEGACY_PLANS[id]?.name ?? id
+
+// Pris for en plan-id som tall (både aktive og legacy). Returnerer null hvis ukjent.
+export const planPris = (id: string): number | null =>
+  getPlanById(id)?.price ?? LEGACY_PLANS[id]?.price ?? null

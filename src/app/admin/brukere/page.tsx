@@ -39,7 +39,7 @@ async function søk() {
   const d = await r.json()
   if (!d.subscriber) { res.innerHTML = '<p style="color:#ef4444">Ingen bruker funnet.</p>'; return }
   const s = d.subscriber
-  const plan = {basis:'Basis 49kr',familie:'Familie 99kr',pro:'Pro 199kr'}[s.plan]||s.plan
+  const plan = {kyst:'Basis 49kr','kyst-pluss':'Standard 99kr',familie:'Familie 199kr',pro:'Pro 299kr',sikkerhet:'Sikkerhet 499kr'}[s.plan]||s.plan
   res.innerHTML = \`
     <div id="brukerKort" style="background:rgba(255,255,255,0.05);border-radius:20px;padding:1.5rem;border:1px solid rgba(255,255,255,0.08)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem">

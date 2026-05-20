@@ -78,7 +78,7 @@ export async function getAccessToken(): Promise<string> {
  * ============================================================ */
 
 export interface CreateAgreementParams {
-  /** Pris i øre (179 NOK = 17900) */
+  /** Pris i øre (f.eks. 99 NOK = 9900). Hentes fra plans.ts via nokToOre(). */
   amountInOre: number
   /** Pakkenavn ("Familie", "Pro", osv.) */
   productName: string

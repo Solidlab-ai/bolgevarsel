@@ -49,6 +49,38 @@ function bestTime(hourly: HourlyPoint[]) {
   return 'Krevende hele dagen'
 }
 
+// Finn værsymbolet for timen nærmest nå (faller tilbake til første tilgjengelige).
+// hourly inneholder nøkkeltimene 06/09/12/15/18/21.
+function nowSymbol(hourly: HourlyPoint[]): string {
+  if (!hourly.length) return ''
+  const nowHour = new Date().getHours()
+  const withSymbol = hourly.filter(h => h.symbol)
+  if (!withSymbol.length) return ''
+  const closest = withSymbol.reduce((best, h) => {
+    const hHour = parseInt(h.time.slice(0, 2), 10)
+    const bHour = parseInt(best.time.slice(0, 2), 10)
+    return Math.abs(hHour - nowHour) < Math.abs(bHour - nowHour) ? h : best
+  }, withSymbol[0])
+  return closest.symbol
+}
+
+// Kort tekst-etikett for værsymbolet (for tilgjengelighet/tooltip).
+function weatherLabel(symbol: string): string {
+  const s = symbol.replace('_night', '').replace('_day', '').replace('_polartwilight', '')
+  if (!s) return ''
+  if (s === 'clearsky') return 'Klarvær'
+  if (s === 'fair') return 'Lettskyet'
+  if (s === 'partlycloudy') return 'Delvis skyet'
+  if (s === 'cloudy') return 'Skyet'
+  if (s === 'fog') return 'Tåke'
+  if (s.includes('thunder')) return 'Torden'
+  if (s.includes('snow')) return 'Snø'
+  if (s.includes('sleet')) return 'Sludd'
+  if (s.includes('lightrain') || s === 'drizzle') return 'Lett regn'
+  if (s.includes('rain') || s.includes('shower')) return 'Regn'
+  return ''
+}
+
 async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   const today = new Date().toISOString().slice(0, 10)
   const tLat = Math.round(lat * 10000) / 10000
@@ -357,6 +389,11 @@ export default function LokasjonPanel({
         const isActive = activeIdx === i
         const wd = isActive && d && d !== 'loading' && d !== 'error' ? d as WeatherData : null
 
+        // Værsymbol for nå — vises i lista-raden ved siden av sjøtilstanden
+        const rowWeather = d && d !== 'loading' && d !== 'error' ? (d as WeatherData) : null
+        const rowSymbol = rowWeather ? nowSymbol(rowWeather.hourly) : ''
+        const rowWeatherLabel = weatherLabel(rowSymbol)
+
         return (
           <div key={loc.id} style={S.card}>
             <div style={S.row(isActive)} onClick={() => toggle(i)}>
@@ -370,6 +407,11 @@ export default function LokasjonPanel({
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 8 }}>
+                {rowSymbol && (
+                  <span title={rowWeatherLabel} aria-label={rowWeatherLabel} style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+                    <WeatherIcon symbol={rowSymbol} size={18} />
+                  </span>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
                   <span style={{ fontSize: 12, fontWeight: 500, color, whiteSpace: 'nowrap' }}>{label}</span>

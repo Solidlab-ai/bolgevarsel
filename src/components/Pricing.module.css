@@ -17,6 +17,7 @@
   cursor: pointer;
   font-family: inherit;
   color: inherit;
+  text-decoration: none;
   position: relative;
   width: 100%;
 }

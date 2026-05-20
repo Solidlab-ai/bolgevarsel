@@ -123,8 +123,8 @@ export function PushToggle({ email }: { email: string }) {
           {state === 'denied'
             ? 'Du har blokkert varsler i nettleseren. Skru på igjen i nettleserinnstillingene for å bruke push.'
             : isOn
-            ? 'Du får varsler direkte på denne enheten. Kritisk farevarsel sendes alltid på SMS i tillegg.'
-            : 'Få daglige varsler rett på enheten — i tillegg til SMS. Fungerer best når appen er lagt til på hjemskjermen.'}
+            ? 'Du får varsler direkte på denne enheten.'
+            : 'Få varsler rett på enheten. Fungerer best når appen er lagt til på hjemskjermen.'}
         </div>
         {error && <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4 }}>{error}</div>}
       </div>

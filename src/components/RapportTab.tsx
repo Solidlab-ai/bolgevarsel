@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import BvSelect from './BvSelect'
 import BvSheet from './BvSheet'
 
-type Loc = { id: string; name: string; lat: number; lon: number }
+type Loc = { id: string; name: string; lat: number; lon: number; profile?: string | null }
 
 const PROFILER = [
   { value: '', label: 'Generell sjørapport' },
@@ -304,7 +304,7 @@ function DayCard({ day, profile }: { day: any; profile: string }) {
 export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: string }) {
   const [locId, setLocId] = useState(locs[0]?.id ?? '')
   const [days, setDays] = useState('1')
-  const [profile, setProfile] = useState('')
+  const [profile, setProfile] = useState(locs[0]?.profile ?? '')
   const [loading, setLoading] = useState(false)
   const [rapport, setRapport] = useState<any[] | null>(null)
   const [sendingEmail, setSendingEmail] = useState(false)
@@ -313,6 +313,14 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
   const [flerdagLoading, setFlerdagLoading] = useState(false)
 
   const selectedLoc = locs.find(l => l.id === locId)
+
+  // Når bruker bytter lokasjon: forhåndsutfyll profil fra lokasjonens
+  // standardprofil. Brukeren kan fortsatt overstyre etterpå.
+  function handleLocChange(newLocId: string) {
+    setLocId(newLocId)
+    const loc = locs.find(l => l.id === newLocId)
+    setProfile(loc?.profile ?? '')
+  }
 
   async function generer() {
     if (!selectedLoc) return
@@ -376,7 +384,7 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
             <div style={{ fontSize: 12, color: '#6b8fa3', marginBottom: 4 }}>Lokasjon</div>
             <BvSelect
               value={locId}
-              onChange={setLocId}
+              onChange={handleLocChange}
               options={locs.map(l => ({ value: l.id, label: l.name }))}
               ariaLabel="Lokasjon"
             />
@@ -399,6 +407,11 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
             options={PROFILER}
             ariaLabel="Aktivitetsprofil"
           />
+          {selectedLoc?.profile && profile === selectedLoc.profile && (
+            <div style={{ fontSize: 11, color: '#6b8fa3', marginTop: 4 }}>
+              Forhåndsvalgt fra lokasjonens standardprofil — du kan endre den her.
+            </div>
+          )}
         </div>
         <button style={{ ...S.btnP, width: '100%', opacity: loading ? 0.6 : 1 }} onClick={generer} disabled={loading || !selectedLoc}>
           {loading ? 'Henter data...' : 'Generer rapport'}

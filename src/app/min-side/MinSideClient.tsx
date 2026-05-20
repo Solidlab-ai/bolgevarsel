@@ -71,7 +71,7 @@ type Sub = {
   trial_ends_at?: string | null
   next_charge_due_at?: string | null
 }
-type Loc = { id:string; name:string; lat:number; lon:number }
+type Loc = { id:string; name:string; lat:number; lon:number; profile?:string|null }
 
 // Tids-options grupperte etter tid på døgnet for raskere navigering
 const SEND_TIME_OPTIONS = [
@@ -144,6 +144,7 @@ export default function MinSideClient() {
   const [selectedLocSummary, setSelectedLocSummary] = useState<string | null>(null)
   const [selectedLocScoreColor, setSelectedLocScoreColor] = useState<string>('#94a3b8')
   const [selectedLocScoreLabel, setSelectedLocScoreLabel] = useState<string>('Laster...')
+  const [savingLocProfile, setSavingLocProfile] = useState(false)
   const [activeTab, setActiveTab] = useState<'lokasjoner'|'mottakere'|'rapport'|'konto'|'nodkontakt'>('lokasjoner')
   const [accountLoading, setAccountLoading] = useState<string|null>(null)
   const [showAddRec, setShowAddRec] = useState(false)
@@ -302,6 +303,21 @@ export default function MinSideClient() {
     await fetch('/api/min-side/location/delete', { method:'DELETE', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, subscriber_id:sub!.id }) })
     setLocs(locs.filter(l=>l.id!==id)); setRecs(recs.filter(r=>r.location_id!==id))
+  }
+
+  // Lagrer standard aktivitetsprofil på en lokasjon. Oppdaterer både
+  // lokasjonslista og den åpne detaljvisningen.
+  async function saveLocProfile(locId: string, profile: string) {
+    setSavingLocProfile(true)
+    try {
+      const r = await fetch('/api/min-side/location', { method:'PATCH', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id: locId, subscriber_id: sub!.id, profile: profile || null }) })
+      const d = await r.json()
+      if (d.location) {
+        setLocs(locs.map(l => l.id===locId ? { ...l, profile: d.location.profile } : l))
+        setSelectedLoc(prev => prev && prev.id===locId ? { ...prev, profile: d.location.profile } : prev)
+      }
+    } finally { setSavingLocProfile(false) }
   }
 
   async function addRec(e: React.FormEvent) {
@@ -1501,6 +1517,35 @@ export default function MinSideClient() {
                   <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6c0-2.2 1.8-4 4-4s4 1.8 4 4c0 3-4 5-4 5S2 9 2 6z" stroke="currentColor" strokeWidth="1.2" fill="none"/><circle cx="6" cy="6" r="1.3" fill="currentColor"/></svg>
                   Maps
                 </a>
+              </div>
+
+              {/* Standard aktivitetsprofil for lokasjonen */}
+              <div style={{background:'#f8fbfc',borderRadius:12,padding:'14px 16px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:4}}>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10 Q4 7 7 8 Q10 9 12 6" stroke="#1a6080" strokeWidth="1.3" strokeLinecap="round" fill="none"/><path d="M2 10 Q3 12 5 11" stroke="#1a6080" strokeWidth="1" strokeLinecap="round" fill="none"/></svg>
+                  <div style={{fontSize:11,color:'#6b8fa3',textTransform:'uppercase',letterSpacing:'0.06em'}}>Standard aktivitetsprofil</div>
+                </div>
+                <p style={{fontSize:12,color:'#6b8fa3',lineHeight:1.5,margin:'0 0 10px'}}>
+                  Velg hva denne lokasjonen brukes til. Da tilpasses rapporten automatisk — f.eks. surfeforhold for en surfespot. Nye mottakere får denne som utgangspunkt, men kan overstyres per mottaker.
+                </p>
+                <BvSelect
+                  value={selectedLoc.profile || ''}
+                  onChange={(v)=>saveLocProfile(selectedLoc.id, v)}
+                  ariaLabel="Standard aktivitetsprofil for lokasjonen"
+                  options={[
+                    { value: '', label: 'Generell sjørapport' },
+                    { value: 'surfer', label: 'Surfer' },
+                    { value: 'kitesurfer', label: 'Kitesurfer' },
+                    { value: 'windsurfer', label: 'Windsurfer' },
+                    { value: 'fisker', label: 'Fisker' },
+                    { value: 'familie', label: 'Barn/ungdom med båt' },
+                    { value: 'baatforer', label: 'Båtfører' },
+                    { value: 'kajakk', label: 'Padler / kajakk' },
+                    { value: 'seiler', label: 'Seiler' },
+                    { value: 'fridykker', label: 'Fridykker / snorkling' },
+                  ]}
+                />
+                {savingLocProfile && <div style={{fontSize:11,color:'#6b8fa3',marginTop:6}}>Lagrer...</div>}
               </div>
 
               {/* Mottakere på denne lokasjonen */}

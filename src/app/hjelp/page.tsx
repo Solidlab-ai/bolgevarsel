@@ -80,12 +80,13 @@ const KATEGORIER = [
     beskrivelse: 'Forstå SMS-varslene og e-postrapportene dine',
     artikler: [
       { slug: 'nar-sendes-varsel', tittel: 'Når sendes varselet?' },
-      { slug: 'forstå-sms', tittel: 'Forstå SMS-varselet' },
-      { slug: 'forstå-epost', tittel: 'Forstå e-postrapporten' },
+      { slug: 'forsta-sms', tittel: 'Forstå SMS-varselet' },
+      { slug: 'forsta-epost', tittel: 'Forstå e-postrapporten' },
       { slug: 'farevarsel', tittel: 'Hva er et farevarsel?' },
       { slug: 'pause-sms', tittel: 'Pause eller skru av SMS-varsler' },
       { slug: 'rapport-fanen', tittel: 'Bruk rapport-fanen på Min side' },
       { slug: 'kritisk-farevarsel', tittel: 'Kritisk farevarsel — alltid på' },
+      { slug: 'push-varsler', tittel: 'Push-varsler i nettleseren' },
     ],
   },
   {
@@ -94,6 +95,7 @@ const KATEGORIER = [
     Ikon: IkonKonto,
     beskrivelse: 'Administrer kontoen din, bytt plan eller si opp',
     artikler: [
+      { slug: 'min-side', tittel: 'Oversikt over Min side' },
       { slug: 'logg-inn', tittel: 'Slik logger du inn' },
       { slug: 'endre-epost', tittel: 'Endre e-postadresse' },
       { slug: 'bytte-plan', tittel: 'Bytte abonnementsplan' },

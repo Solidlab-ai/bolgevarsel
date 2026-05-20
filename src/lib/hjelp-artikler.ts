@@ -20,11 +20,14 @@ export const ARTIKLER: Record<string, Artikkel> = {
 <h2>Hva får du?</h2>
 <p>Avhengig av abonnementsplan mottar du:</p>
 <ul>
+<li>Daglig <strong>e-postrapport</strong> med fullstendig oversikt og timesvarsel</li>
 <li>Daglig <strong>SMS-varsel</strong> med kortfattet værinformasjon</li>
-<li>Daglig <strong>e-postrapport</strong> med fullstendig oversikt</li>
-<li>Automatisk <strong>farevarsel</strong> ved ekstremvær eller kuling</li>
+<li>Automatisk <strong>kritisk farevarsel</strong> ved kuling og farlige forhold</li>
+<li><strong>AI-oppsummering</strong> som forklarer dagens forhold i klartekst, tilpasset aktiviteten din</li>
+<li>Tilgang til <strong>Min side</strong> med rapportgenerator, kart og full kontroll over varsler</li>
+<li>Bølgehøyde, vind, bølgeperiode, sjø- og lufttemperatur — pluss soloppgang og solnedgang</li>
 </ul>
-<p>Du velger selv hvilke kyststeder du vil følge, og hvem som skal motta varslene.</p>
+<p>Du velger selv hvilke kyststeder du vil følge, hvilken aktivitetsprofil som passer, og hvem som skal motta varslene.</p>
 `,
   },
 
@@ -64,10 +67,10 @@ export const ARTIKLER: Record<string, Artikkel> = {
 <p>Gå til <a href="/registrer" style="color:#4da8cc">bolgevarsel.no/registrer</a> og velg abonnementsplanen som passer deg. Du kan alltid bytte plan senere.</p>
 <h2>Steg 2 — Skriv inn e-postadressen din</h2>
 <p>Skriv inn e-postadressen du ønsker å bruke. Denne brukes til å logge inn og motta e-postrapporter.</p>
-<h2>Steg 3 — Betal</h2>
-<p>Du sendes til en sikker Stripe-betalingsside. Vi aksepterer alle vanlige betalingskort. Abonnementet fornyes automatisk hver måned og du kan si opp når som helst.</p>
+<h2>Steg 3 — Betal med Vipps eller kort</h2>
+<p>Du sendes til en sikker betalingsside. Du kan betale med <strong>Vipps</strong> eller <strong>betalingskort</strong> (Visa/Mastercard via Stripe). Alle planer har <strong>7 dagers gratis prøveperiode</strong> — du belastes ikke før prøveperioden er over. Abonnementet fornyes automatisk hver måned, og du kan si opp når som helst.</p>
 <h2>Steg 4 — Sjekk innboksen</h2>
-<p>Etter betaling sender vi deg en velkomste-post med en innloggingslenke. Klikk lenken for å komme til Min side.</p>
+<p>Etter registrering sender vi deg en velkomste-post med en innloggingslenke. Klikk lenken for å komme til Min side.</p>
 <h2>Steg 5 — Legg til lokasjon og mottakere</h2>
 <p>På Min side legger du til kyststedet du vil følge og telefonnumrene som skal motta SMS-varsler. Ferdig!</p>
 <p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 <strong>Tips:</strong> Du begynner å motta daglige varsler fra neste morgen, kl. du har valgt.</p>
@@ -253,8 +256,12 @@ bolgevarsel.no
 <p>E-postrapporten gir en komplett gjennomgang av sjø- og værsituasjonen. Den er mer detaljert enn SMS og inneholder trender fremover i tid.</p>
 <h2>Innholdet i rapporten</h2>
 <ul>
-<li><strong>Dagens forhold</strong> — bølgehøyde, vind, temperatur og en vurdering</li>
-<li><strong>Farevarsel-status</strong> — om det er varslet om ekstremvær</li>
+<li><strong>AI-oppsummering</strong> — en kort tekst som forklarer dagens forhold i klartekst, tilpasset aktivitetsprofilen din</li>
+<li><strong>Dagens forhold</strong> — bølgehøyde, vind, bølgeperiode, luft- og sjøtemperatur</li>
+<li><strong>Værikon</strong> — himmelforhold (sol, skyer, regn) ved siden av sjøtilstanden</li>
+<li><strong>Timesvarsel</strong> — bølgesøyler per time med fargekode og beste tidspunkt på dagen</li>
+<li><strong>Soloppgang og solnedgang</strong> for dagen</li>
+<li><strong>Farevarsel-status</strong> — om det er varslet om kuling eller farlige forhold</li>
 <li><strong>Alle dine lokasjoner</strong> — én seksjon per sted du følger</li>
 </ul>
 <h2>Farger og emojier</h2>
@@ -264,6 +271,7 @@ bolgevarsel.no
 <li>🟡 Moderat — vær litt forsiktig</li>
 <li>🔴 Krevende eller farlige forhold</li>
 </ul>
+<p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 Vil du forstå alle forkortelser og fargekoder? Se artikkelen <strong>«Tegnforklaring»</strong> under Varsler og rapporter.</p>
 `,
   },
 
@@ -340,6 +348,7 @@ bolgevarsel.no
     kategori: 'Konto og abonnement',
     html: `
 <p>Du kan bytte abonnementsplan når som helst. Send oss en e-post på <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a> med hvilken plan du ønsker å bytte til, så ordner vi det for deg.</p>
+<p style="padding:0.85rem 1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem;margin:1rem 0">💡 Vil du bare ta en pause eller avslutte? Det kan du gjøre selv på <a href="/min-side" style="color:#4da8cc">Min side → Konto</a> — se artikkelen «Si opp abonnementet».</p>
 <h2>Hva skjer med eksisterende data?</h2>
 <p>Lokasjoner og mottakere beholdes ved planbytte. Hvis du bytter til en plan med færre lokasjoner eller mottakere enn du allerede har, vil vi informere deg om hva som må justeres.</p>
 <h2>Fakturering ved planbytte</h2>
@@ -351,17 +360,20 @@ bolgevarsel.no
     tittel: 'Si opp abonnementet',
     kategori: 'Konto og abonnement',
     html: `
-<p>Du kan si opp abonnementet ditt når som helst — ingen bindingstid.</p>
-<h2>Slik sier du opp</h2>
-<p>Send en e-post til <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a> fra e-postadressen din og be om oppsigelse. Vi behandler det innen én virkedag.</p>
-<h2>Hva skjer etter oppsigelse?</h2>
+<p>Du kan avslutte abonnementet ditt når som helst — ingen bindingstid. Det meste kan du styre selv på Min side.</p>
+<h2>Frys abonnementet (kortbetaling)</h2>
+<p>Betaler du med kort, kan du <strong>fryse</strong> abonnementet midlertidig på <a href="/min-side" style="color:#4da8cc">Min side → Konto</a>. Da stopper varsler og fakturering, og du kan reaktivere med ett klikk når du er klar igjen. Perfekt om du tar en pause utenom båtsesongen.</p>
+<h2>Slett konto</h2>
+<p>Vil du avslutte helt? Trykk <strong>«Slett konto»</strong> nederst i Konto-fanen. Abonnementet avsluttes, og dataene dine slettes permanent etter 30 dager.</p>
+<h2>Vipps-abonnement</h2>
+<p>Vipps-avtaler kan ikke fryses. Bruk «Slett konto» på Min side for å avslutte, eller stopp den løpende avtalen direkte i Vipps-appen under <em>Avtaler og abonnement</em>.</p>
+<h2>Hva skjer etter avslutning?</h2>
 <ul>
-<li>Abonnementet løper ut inneværende betalingsperiode</li>
-<li>Du vil ikke belastes for neste periode</li>
-<li>Varsler fortsetter til periodens slutt</li>
+<li>Du belastes ikke for neste periode</li>
+<li>Varsler fortsetter ut inneværende betalingsperiode</li>
 <li>Kontoen og dataene dine slettes etter 30 dager</li>
 </ul>
-<p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 Vurderer du å si opp fordi du savner en funksjon? Send oss en e-post — vi tar gjerne imot tilbakemeldinger!</p>
+<p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 Vurderer du å avslutte fordi du savner en funksjon? Send oss en e-post på <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a> — vi tar gjerne imot tilbakemeldinger!</p>
 `,
   },
 
@@ -369,13 +381,18 @@ bolgevarsel.no
     tittel: 'Betaling og faktura',
     kategori: 'Konto og abonnement',
     html: `
-<p>Bølgevarsel bruker <strong>Stripe</strong> for sikker betalingshåndtering. Vi lagrer aldri kortinformasjon på egne servere.</p>
+<p>Bølgevarsel tilbyr betaling med <strong>Vipps</strong> og <strong>betalingskort</strong>. Kortbetaling håndteres sikkert av <strong>Stripe</strong> — vi lagrer aldri kortinformasjon på egne servere.</p>
 <h2>Betalingsmetoder</h2>
-<p>Vi aksepterer alle vanlige betalingskort — Visa, Mastercard og American Express.</p>
+<ul>
+<li><strong>Vipps</strong> — løpende avtale, du godkjenner i Vipps-appen</li>
+<li><strong>Betalingskort</strong> — Visa og Mastercard via Stripe</li>
+</ul>
+<h2>Gratis prøveperiode</h2>
+<p>Alle planer starter med <strong>7 dagers gratis prøveperiode</strong>. Du belastes ikke før prøveperioden er over, og kan avslutte underveis uten kostnad.</p>
 <h2>Fakturering</h2>
-<p>Abonnementet faktureres månedlig fra den dagen du registrerte deg. Du mottar en kvittering på e-post etter hver betaling.</p>
-<h2>Finn dine fakturaer</h2>
-<p>Kvitteringer sendes automatisk til e-postadressen din fra Stripe. Har du mistet en kvittering? Kontakt oss på <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a>.</p>
+<p>Abonnementet faktureres månedlig fra den dagen prøveperioden utløper. Du mottar en kvittering på e-post etter hver betaling.</p>
+<h2>Finn kvitteringene dine</h2>
+<p>Alle kvitteringer (salgsbilag med fakturanummer og MVA-spesifikasjon) ligger samlet på <a href="/min-side" style="color:#4da8cc">Min side → Konto</a>. Klikk en kvittering for å åpne den — du kan lagre den som PDF direkte i nettleseren. Trenger du hjelp, kontakt oss på <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a>.</p>
 `,
   },
 
@@ -479,10 +496,11 @@ bolgevarsel.no
 </ol>
 <h2>Hva vises i rapporten?</h2>
 <ul>
-<li>Daglig vurdering tilpasset aktivitetsprofilen din</li>
-<li>Bølgesøyler per time med værikoner</li>
-<li>Beste tidspunkt på dagen</li>
+<li>AI-oppsummering og daglig vurdering tilpasset aktivitetsprofilen din</li>
+<li>Værikon for himmelforhold (sol, skyer, regn) ved siden av sjøtilstanden</li>
+<li>Bølgesøyler per time med beste tidspunkt på dagen</li>
 <li>Lufttemperatur og sjøtemperatur</li>
+<li>Soloppgang og solnedgang</li>
 <li>Profilspesifikke tips (våtdrakt, seil, vindstyrke osv.)</li>
 </ul>
 <h2>Last ned eller send på e-post</h2>
@@ -666,6 +684,50 @@ Gode fiskeforhold<br/>
 Vind 3.1/5.4m/s, Bolger 0.6m
 </div>
 <p>Du velger profil per mottaker på <a href="/min-side" style="color:#4da8cc">Min side</a>. Profilen påvirker også e-postrapporten med mer detaljerte tips.</p>
+`,
+  },
+
+  'varsler/push-varsler': {
+    tittel: 'Push-varsler i nettleseren',
+    kategori: 'Varsler og rapporter',
+    html: `
+<p>Push-varsler lar deg få beskjed direkte på enheten din — uten SMS. De dukker opp som et lite varsel på telefon eller PC, akkurat som en app-melding. Push er et gratis supplement til SMS og e-post.</p>
+<h2>Slik skrur du på push-varsler</h2>
+<ol>
+<li>Logg inn på <a href="/min-side" style="color:#4da8cc">Min side</a></li>
+<li>Gå til <strong>Konto</strong>-fanen</li>
+<li>Finn <strong>Push-varsler</strong> og skru på bryteren</li>
+<li>Godkjenn at nettleseren får sende deg varsler</li>
+</ol>
+<h2>Installer som app for best opplevelse</h2>
+<p>Bølgevarsel er en web-app (PWA) du kan installere på hjemskjermen. På Android gjøres dette via Chrome-menyen («Legg til på startskjerm»), og på iPhone via Del-knappen i Safari («Legg til på Hjem-skjerm»). På iPhone må appen være installert på hjemskjermen for at push skal fungere.</p>
+<h2>Skru av igjen</h2>
+<p>Du kan når som helst skru av bryteren på Min side, eller blokkere varsler i nettleserinnstillingene. Har du blokkert varsler i nettleseren, må du skru dem på igjen der før bryteren virker.</p>
+<p style="margin-top:1.5rem;padding:1rem;background:#fee2e2;border-left:4px solid #dc2626;border-radius:0 12px 12px 0;font-size:0.9rem"><strong>Viktig:</strong> Kritisk farevarsel sendes alltid på SMS. Push er et supplement — ikke en erstatning for SMS-farevarsel.</p>
+`,
+  },
+
+  'konto/min-side': {
+    tittel: 'Oversikt over Min side',
+    kategori: 'Konto og abonnement',
+    html: `
+<p>Min side er kontrollsenteret ditt i Bølgevarsel. Her styrer du alt selv — lokasjoner, mottakere, varsler og abonnement.</p>
+<h2>Fanene på Min side</h2>
+<ul>
+<li><strong>Lokasjoner</strong> — legg til og følg kyststeder. Klikk en lokasjon for live sjødata, værikon, AI-oppsummering og kart.</li>
+<li><strong>Mottakere</strong> — legg til hvem som skal få varsler, med egen aktivitetsprofil og leveringstidspunkt per person. CSV-import for mange mottakere.</li>
+<li><strong>Rapport</strong> — generer en sjørapport på forespørsel for 1–7 dager frem, last ned som PDF eller send på e-post.</li>
+<li><strong>Konto</strong> — leveringstidspunkt, push-varsler, kvitteringer, frys/reaktiver abonnement og slett konto.</li>
+</ul>
+<h2>Hva kan du gjøre selv?</h2>
+<ul>
+<li>Legge til og fjerne lokasjoner og mottakere</li>
+<li>Sette aktivitetsprofil og leveringstidspunkt per mottaker</li>
+<li>Skru push-varsler av og på</li>
+<li>Åpne og lagre kvitteringer som PDF</li>
+<li>Fryse og reaktivere abonnement (kortbetaling), eller slette konto</li>
+</ul>
+<p style="margin-top:1.5rem;padding:1rem;background:#f0f8fc;border-radius:12px;font-size:0.9rem">💡 <strong>Tips:</strong> Min side fungerer like godt på mobil som på PC, og kan installeres som app på hjemskjermen.</p>
 `,
   },
 

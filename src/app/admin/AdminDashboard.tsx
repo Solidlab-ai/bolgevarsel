@@ -13,7 +13,12 @@ const S = {
 
 type Props = {
   subscribers: any[]
-  stats: { aktive: number; inntekt: number; smskostnad: number; netto: number; smsPrMnd: number; totalMottakere: number }
+  stats: {
+    aktive: number; inntekt: number; smskostnad: number; netto: number; smsPrMnd: number; totalMottakere: number
+    trialing: number; betalende: number; paused: number; cancelled: number
+    nyeDenneMnd: number; viaVipps: number; viaKort: number; snittPerKunde: number
+    pushSubs: number; totalLokasjoner: number
+  }
   planTelling: any[]
 }
 
@@ -118,18 +123,38 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
       )}
 
       <div style={S.wrap}>
-        {/* STATS */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        {/* KPI: VEKST & KUNDER */}
+        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Vekst & kunder</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
-            { label: 'Aktive abonnenter', verdi: stats.aktive, farge: '#4da8cc' },
-            { label: 'Inntekt/mnd', verdi: stats.inntekt + ' kr', farge: '#4ade80' },
-            { label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c' },
-            { label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171' },
-            { label: 'SMS-mottakere', verdi: stats.totalMottakere, farge: '#a78bfa' },
+            { label: 'Betalende', verdi: stats.betalende, farge: '#4ade80', sub: `${stats.aktive} aktive · ${stats.paused} frosne` },
+            { label: 'I prøveperiode', verdi: stats.trialing, farge: '#fbbf24', sub: '7 dagers gratis' },
+            { label: 'Nye denne mnd', verdi: stats.nyeDenneMnd, farge: '#4da8cc', sub: 'siden 1. i mnd' },
+            { label: 'Avsluttet', verdi: stats.cancelled, farge: '#f87171', sub: 'churn totalt' },
+            { label: 'PWA-installasjoner', verdi: stats.pushSubs, farge: '#a78bfa', sub: 'push-abonnenter (proxy)' },
           ].map(s => (
             <div key={s.label} style={S.statCard}>
               <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 300, color: s.farge }}>{s.verdi}</div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* KPI: ØKONOMI & BRUK */}
+        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.7rem', fontWeight: 600 }}>Økonomi & bruk</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          {[
+            { label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `snitt ${stats.snittPerKunde} kr/kunde` },
+            { label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.smsPrMnd} SMS/mnd` },
+            { label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171', sub: 'inntekt − SMS' },
+            { label: 'Betalingsmiks', verdi: `${stats.viaVipps} / ${stats.viaKort}`, farge: '#60a5fa', sub: 'Vipps / kort' },
+            { label: 'Lokasjoner', verdi: stats.totalLokasjoner, farge: '#7dd3fc', sub: `${stats.totalMottakere} SMS-mottakere` },
+          ].map(s => (
+            <div key={s.label} style={S.statCard}>
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>{s.label}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 300, color: s.farge }}>{s.verdi}</div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.3rem' }}>{s.sub}</div>
             </div>
           ))}
         </div>

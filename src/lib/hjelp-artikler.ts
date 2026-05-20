@@ -366,7 +366,7 @@ bolgevarsel.no
 <h2>Slett konto</h2>
 <p>Vil du avslutte helt? Trykk <strong>«Slett konto»</strong> nederst i Konto-fanen. Abonnementet avsluttes, og dataene dine slettes permanent etter 30 dager.</p>
 <h2>Vipps-abonnement</h2>
-<p>Vipps-avtaler kan ikke fryses. Bruk «Slett konto» på Min side for å avslutte, eller stopp den løpende avtalen direkte i Vipps-appen under <em>Avtaler og abonnement</em>.</p>
+<p>Vipps-avtaler kan ikke fryses. Vil du si opp et Vipps-abonnement, send oss en e-post på <a href="mailto:hei@bolgevarsel.no" style="color:#4da8cc">hei@bolgevarsel.no</a> fra e-postadressen din, så ordner vi det innen én virkedag. Du kan også slette kontoen din direkte på Min side.</p>
 <h2>Hva skjer etter avslutning?</h2>
 <ul>
 <li>Du belastes ikke for neste periode</li>

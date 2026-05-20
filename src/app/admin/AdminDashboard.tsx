@@ -18,7 +18,7 @@ type Props = {
     trialing: number; betalende: number; paused: number; cancelled: number
     inaktive: number; churned: number; dagligSmsMottakere: number
     nyeDenneMnd: number; viaVipps: number; viaKort: number; snittPerKunde: number
-    pushSubs: number; totalLokasjoner: number; antallTest: number
+    pushSubs: number; totalLokasjoner: number; antallTest: number; smsFraElks: boolean
   }
   planTelling: any[]
 }
@@ -119,11 +119,13 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
     },
     sms: {
       tittel: 'SMS-kostnad per måned',
-      forklaring: `Estimat basert på DAGLIG SMS (det som faktisk koster hver dag): ${stats.dagligSmsMottakere} mottakere med daglig SMS × 30 dager = ${stats.smsPrMnd} SMS/mnd, à 1,43 kr = ${Math.round(stats.smskostnad)} kr/mnd. Farevarsel-SMS sendes sjelden og er ikke med i estimatet. (${stats.totalMottakere} mottakere kan få farevarsel, men kun ${stats.dagligSmsMottakere} har daglig SMS på.)`,
+      forklaring: stats.smsFraElks
+        ? `✅ Faktiske tall hentet direkte fra 46elks for inneværende måned: ${stats.smsPrMnd} SMS-deler sendt, total kostnad ${stats.smskostnad} kr. Dette inkluderer alt — daglige rapporter, farevarsel, OTP-innlogging, SOS og manuelle meldinger. (Til info: ${stats.dagligSmsMottakere} mottakere har daglig SMS på, men det utgjør bare en del av totalen.)`
+        : `⚠️ Kunne ikke hente faktiske tall fra 46elks akkurat nå — viser estimat i stedet: ${stats.dagligSmsMottakere} daglig-SMS-mottakere × 30 dager = ${stats.smsPrMnd} SMS/mnd à 1,43 kr = ${Math.round(stats.smskostnad)} kr.`,
     },
     netto: {
       tittel: 'Netto per måned',
-      forklaring: `Listepris-inntekt (${stats.inntekt} kr) minus estimert daglig-SMS-kostnad (${Math.round(stats.smskostnad)} kr) = ${Math.round(stats.netto)} kr/mnd. ⚠️ Rabattkoder er ikke trukket fra inntekten, og gebyrer (Stripe/Vipps), drift og API-kostnader er ikke med. Tallet er et grovt overslag.`,
+      forklaring: `Listepris-inntekt (${stats.inntekt} kr) minus ${stats.smsFraElks ? 'faktisk' : 'estimert'} SMS-kostnad (${Math.round(stats.smskostnad)} kr) = ${Math.round(stats.netto)} kr/mnd. ⚠️ Rabattkoder er ikke trukket fra inntekten, og gebyrer (Stripe/Vipps), drift og API-kostnader er ikke med. Tallet er et grovt overslag.`,
     },
     miks: {
       tittel: 'Betalingsmiks',
@@ -274,7 +276,7 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
             { id: 'mrr', label: 'Inntekt/mnd (MRR)', verdi: stats.inntekt + ' kr', farge: '#4ade80', sub: `listepris · snitt ${stats.snittPerKunde} kr` },
-            { id: 'sms', label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: `${stats.dagligSmsMottakere} daglig-SMS · ${stats.smsPrMnd}/mnd` },
+            { id: 'sms', label: 'SMS-kostnad/mnd', verdi: Math.round(stats.smskostnad) + ' kr', farge: '#fb923c', sub: stats.smsFraElks ? `${stats.smsPrMnd} SMS · faktisk fra 46elks` : `${stats.smsPrMnd} SMS · estimat` },
             { id: 'netto', label: 'Netto/mnd', verdi: Math.round(stats.netto) + ' kr', farge: stats.netto > 0 ? '#4ade80' : '#f87171', sub: 'inntekt − SMS' },
             { id: 'miks', label: 'Betalingsmiks', verdi: `${stats.viaVipps} / ${stats.viaKort}`, farge: '#60a5fa', sub: 'Vipps / kort' },
             { id: 'lokasjoner', label: 'Lokasjoner', verdi: stats.totalLokasjoner, farge: '#7dd3fc', sub: `${stats.totalMottakere} SMS-mottakere` },

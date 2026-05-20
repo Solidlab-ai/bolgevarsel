@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { PLANS, planPris } from '@/lib/plans'
+import { hentElksForbruk } from '@/lib/elks-usage'
 import AdminDashboard from './AdminDashboard'
 
 // Kjenner igjen interne testkontoer som ikke skal telle i KPIer
@@ -45,10 +46,9 @@ export default async function AdminPage() {
   const viaVipps = aktive.filter(s => s.payment_provider === 'vipps').length
   const viaKort = aktive.filter(s => s.payment_provider !== 'vipps').length
 
-  // SMS-kostnad: KUN daglig SMS koster hver dag (sms_daily). Farevarsel (sms_enabled) sendes sjelden.
+  // SMS-mottakere (info): daglig SMS = det som genererer daglige meldinger
   const dagligSmsMottakere = aktive.reduce(
     (sum, s) => sum + (s.bv_recipients?.filter((r: any) => r.active && r.sms_daily === true).length ?? 0), 0)
-  // Mottakere som i det hele tatt kan få SMS (farevarsel + evt daglig) — vises som info
   const smsMottakere = aktive.reduce(
     (sum, s) => sum + (s.bv_recipients?.filter((r: any) => r.active && r.sms_enabled !== false).length ?? 0), 0)
 
@@ -57,8 +57,11 @@ export default async function AdminPage() {
   const inntektPerMnd = aktive.reduce((sum, s) => sum + (planPris(s.plan) ?? 0), 0)
   const snittPerKunde = aktive.length ? Math.round(inntektPerMnd / aktive.length) : 0
 
-  const smsPrMnd = dagligSmsMottakere * 30
-  const smskostnad = smsPrMnd * 1.43
+  // FAKTISK SMS-forbruk denne måneden — hentet direkte fra 46elks (ekte tall, ikke estimat)
+  const elks = await hentElksForbruk()
+  const smsPrMnd = elks.ok ? elks.smsSendt : dagligSmsMottakere * 30      // fallback til estimat
+  const smskostnad = elks.ok ? elks.kostnadKr : smsPrMnd * 1.43
+  const smsFraElks = elks.ok
   const netto = inntektPerMnd - smskostnad
 
   // Push-abonnenter (PWA-installasjons-proxy) + lokasjoner (kun ekte kunder)
@@ -78,7 +81,7 @@ export default async function AdminPage() {
         trialing: trialing.length, betalende, paused: paused.length, cancelled: cancelled.length,
         inaktive: inaktive.length, churned, dagligSmsMottakere,
         nyeDenneMnd, viaVipps, viaKort, snittPerKunde,
-        pushSubs: pushSubs ?? 0, totalLokasjoner, antallTest,
+        pushSubs: pushSubs ?? 0, totalLokasjoner, antallTest, smsFraElks,
       }}
       planTelling={planTelling}
     />

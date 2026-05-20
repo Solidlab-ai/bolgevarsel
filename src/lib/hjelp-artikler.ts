@@ -152,6 +152,9 @@ Bestefar,004747123456,bestefar@mail.no,ja</pre>
 
 <h2>Feil ved import</h2>
 <p>Dersom en rad har ugyldig telefonnummer eller mangler påkrevde felt, hoppes den over og du får en tydelig feilmelding. Gyldige rader importeres uansett.</p>
+
+<h2>Aktivitetsprofil og tidspunkt etter import</h2>
+<p>CSV-filen inneholder ikke aktivitetsprofil eller leveringstidspunkt. Alle importerte mottakere arver <strong>lokasjonens standard aktivitetsprofil</strong> og abonnementets standard leveringstidspunkt. Du kan etterpå justere profil og tidspunkt per mottaker under <a href="/min-side" style="color:#4da8cc">Min side → Mottakere</a>.</p>
 `,
   },
   'kom-i-gang/legg-til-mottakere': {

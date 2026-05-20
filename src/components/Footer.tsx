@@ -32,7 +32,7 @@ export default function Footer() {
             <a href="/hjelp">Hjelpesenter</a>
             <a href="/hjelp/kom-i-gang/aktivitetsprofiler">Aktivitetsprofiler</a>
             <a href="/hjelp/varsler/kritisk-farevarsel">Farevarsel</a>
-            <a href="mailto:hei@bolgevarsel.no">Kontakt oss</a>
+            <a href="/kontakt">Kontakt oss</a>
           </div>
         </div>
 

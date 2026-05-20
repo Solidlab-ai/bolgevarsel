@@ -142,7 +142,6 @@ export default function OmPage() {
         }}>
           <strong style={{color:'#0a2a3d'}}>Stå på Pinne AS</strong><br/>
           Org.nr 935 233 488 (drives under merkenavnet Solidlab)<br/>
-          Tunveien 13, 4016 Stavanger<br/>
           E-post: <a href="mailto:hei@bolgevarsel.no" style={{color:'#1a6080'}}>hei@bolgevarsel.no</a>
         </div>
 

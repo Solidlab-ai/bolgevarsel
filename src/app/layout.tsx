@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
+import { CookieBanner } from '@/components/CookieBanner'
 import './globals.css'
 
 const BASE = 'https://bolgevarsel.no'
@@ -74,8 +75,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <ServiceWorkerRegister />
+        <CookieBanner />
         <Analytics />
         <SpeedInsights />
+        {/* Google Consent Mode v2 — default DENIED til brukeren samtykker.
+            Må kjøre FØR gtag.js lastes (beforeInteractive). */}
+        <Script id="ga-consent-default" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied',
+              wait_for_update: 500
+            });
+            // Les tidligere samtykke fra localStorage og oppdater hvis gitt
+            try {
+              if (localStorage.getItem('bv_cookie_consent') === 'granted') {
+                gtag('consent', 'update', { analytics_storage: 'granted' });
+              }
+            } catch (e) {}
+          `}
+        </Script>
         {/* Google Analytics 4 */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
@@ -83,8 +107,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Script id="ga4-init" strategy="afterInteractive">
           {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_ID}', {
               page_path: window.location.pathname,

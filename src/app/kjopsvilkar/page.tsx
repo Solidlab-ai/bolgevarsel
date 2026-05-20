@@ -23,7 +23,7 @@ export default function Kjopsvilkar() {
         <p style={{color:'#2c4a5e',lineHeight:1.7,marginBottom:'2rem'}}>Disse vilkårene gjelder for kjøp av abonnement på Bølgevarsel.no. Ved å starte abonnement aksepterer du disse vilkårene.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>1. Tjenesten</h2>
-        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Bølgevarsel.no er en abonnementstjeneste som leverer daglige bølge- og værvarsler for kystlokasjoner i Norge på e-post og SMS. Tjenesten leveres av Solidlab.ai (Stå på Pinne AS), organisasjonsnummer 935 233 488, Tunveien 13, 4016 Stavanger.</p>
+        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Bølgevarsel.no er en abonnementstjeneste som leverer daglige bølge- og værvarsler for kystlokasjoner i Norge på e-post og SMS. Tjenesten leveres av Stå på Pinne AS, organisasjonsnummer 935 233 488, Stavanger.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>2. Priser og pakker</h2>
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Vi tilbyr tre abonnementspakker: Basis (49 kr/mnd), Standard (99 kr/mnd) og Familie (199 kr/mnd). Alle priser er inkludert mva. Funksjonsoversikt for hver pakke vises på <a href="/#pris" style={{color:'#1a6080'}}>prisesiden</a>.</p>
@@ -32,7 +32,7 @@ export default function Kjopsvilkar() {
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Nye kunder får 7 dagers gratis prøveperiode. Du må oppgi gyldig betalingskort ved registrering, men kortet belastes ikke før prøveperioden er over. Sier du opp før prøveperioden er ferdig, blir du ikke belastet.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>4. Fakturering og fornyelse</h2>
-        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Etter prøveperioden fornyes abonnementet automatisk hver måned. Beløpet trekkes fra det registrerte kortet på samme dato hver måned. Betaling håndteres av Stripe — vi lagrer aldri kortdata direkte.</p>
+        <p style={{color:'#2c4a5e',lineHeight:1.7}}>Etter prøveperioden fornyes abonnementet automatisk hver måned. Beløpet trekkes på samme dato hver måned. Betaling håndteres av Vipps eller Stripe — vi lagrer aldri kortdata direkte.</p>
 
         <h2 style={{fontSize:'1.2rem',fontWeight:500,color:'#0a2a3d',marginTop:'2rem',marginBottom:'0.5rem'}}>5. Oppsigelse</h2>
         <p style={{color:'#2c4a5e',lineHeight:1.7}}>Du kan si opp abonnementet når som helst fra <a href="/min-side" style={{color:'#1a6080'}}>Min side</a>. Oppsigelse trer i kraft ved utløpet av inneværende fakturaperiode — du beholder tilgang ut den perioden du allerede har betalt for. Ingen bindingstid.</p>

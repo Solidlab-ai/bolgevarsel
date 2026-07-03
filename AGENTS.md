@@ -40,3 +40,5 @@ Supabase-prosjekt: `zqodoekmswibvjzhtixf`
 - Hold hemmeligheter i `.env` / Vercel env — aldri commit `.env`-filer eller hardkodede nøkler.
 - Repoene ligger i GitHub-org-en `Solidlab-ai`. Vercel autodeployer fra `main`.
 - Rediger lokalt → `git add . && git commit` → `git push` → autodeploy.
+
+<!-- autodeploy-test 12:51:07 -->

@@ -32,8 +32,8 @@ const steps = [
   {
     num: '03',
     title: 'Du mottar din daglige sjørapport',
-    desc: 'Push-varsel i appen med det viktigste, detaljert rapport på Min side med timesvarsel og profilspesifikke AI-tips — e-post og SMS som backup.',
-    details: ['Push-varsel i appen med bølge, vind og temperatur', 'Min side med time-for-time graf', 'AI-oppsummering per aktivitetsprofil', 'Rapportgenerator — sjekk 7 dager frem'],
+    desc: 'Push-varsel i appen med det viktigste, detaljert rapport på Min side med timesvarsel og profilspesifikke tips — e-post og SMS som backup.',
+    details: ['Push-varsel i appen med bølge, vind og temperatur', 'Min side med time-for-time graf', 'Skreddersydd oppsummering per aktivitetsprofil', 'Rapportgenerator — sjekk 7 dager frem'],
     icon: (
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
         <rect x="7" y="2" width="12" height="20" rx="2.5" stroke="currentColor" strokeWidth="1.6" fill="none"/>
@@ -91,7 +91,7 @@ export default function HowItWorks() {
           </div>
           <div className={styles.previewAI}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1C3.7 1 1 3.7 1 7s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6z" stroke="#4da8cc" strokeWidth="1.2" fill="none"/><path d="M4.5 7.5L6.5 9.5l3.5-5" stroke="#4da8cc" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span>AI-vurdering: <em>Gode forhold for familietur. Bølgene er stabile og vinden svak — perfekt for barn i åpen båt. Sjøtemperaturen er for kald for bading, men rolig farvann hele dagen.</em></span>
+            <span>Vurdering: <em>Gode forhold for familietur. Bølgene er stabile og vinden svak — perfekt for barn i åpen båt. Sjøtemperaturen er for kald for bading, men rolig farvann hele dagen.</em></span>
           </div>
         </div>
 

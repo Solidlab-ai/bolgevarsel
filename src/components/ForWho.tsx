@@ -41,7 +41,7 @@ const personas = [
     tittel: 'Finn den ene gode dagen — ikke håp på at helgen holder',
     beskrivelse: 'Rapportgeneratoren viser deg hele uken frem i tid. AI-en analyserer hvilken dag som er best for din tur og hvorfor. Ikke mer synsing — én tydelig anbefaling.',
     datapunkter: [
-      { ikon: IkonKalendar, tekst: '7-dagers rapport med AI-analyse' },
+      { ikon: IkonKalendar, tekst: '7-dagers rapport med detaljert analyse' },
       { ikon: IkonVind, tekst: 'Vindkast og Beaufort-skala' },
       { ikon: IkonSol, tekst: 'Soloppgang og solnedgang' },
       { ikon: IkonAI, tekst: '"Tirsdag er klart best denne uken"' },
@@ -67,7 +67,7 @@ const personas = [
     imgAlt: 'Surfer på norsk strandbreak med snødekte fjell',
     tag: 'For surfere',
     tittel: 'Periode, retning og offshore-vind — ikke bare bølgehøyde',
-    beskrivelse: '5 sekunder periode og onshore vind? Da er det ikke verdt det. Bølgevarsel vet det — og sier det rett ut. AI-oppsummeringen forstår surfing.',
+    beskrivelse: '5 sekunder periode og onshore vind? Da er det ikke verdt det. Bølgevarsel vet det — og sier det rett ut. Oppsummeringen forstår surfing.',
     datapunkter: [
       { ikon: IkonPeriode, tekst: 'Bølgeperiode — choppy eller swell?' },
       { ikon: IkonKompass, tekst: 'Offshore vs. onshore vind' },
@@ -88,7 +88,7 @@ const personas = [
       { ikon: IkonKart, tekst: 'Opptil 5 lokasjoner langs ruten' },
       { ikon: IkonKalendar, tekst: 'Flerdag-analyse for planlegging' },
     ],
-    funksjoner: ['Aktivitetsprofil: Seiler', 'Seiloppsett-anbefaling', 'Pro-plan: 5 lokasjoner langs kysten', 'Flerdag AI-analyse'],
+    funksjoner: ['Aktivitetsprofil: Seiler', 'Seiloppsett-anbefaling', 'Pro-plan: 5 lokasjoner langs kysten', 'Flerdagsanalyse'],
   },
   {
     img: '/images/kajakk-ny.jpg',

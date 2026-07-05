@@ -232,7 +232,7 @@ function DayCard({ day, profile }: { day: any; profile: string }) {
               <path d="M3.5 5.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" fill="none"/>
               <circle cx="5.5" cy="3.5" r=".5" fill="#94a3b8"/>
             </svg>
-            <span style={{ fontSize: 10, color: '#94a3b8' }}>Generert av AI — kan inneholde feil. Sjekk alltid offisielle farevarsler.</span>
+            <span style={{ fontSize: 10, color: '#94a3b8' }}>Automatisk generert — kan inneholde feil. Sjekk alltid offisielle farevarsler.</span>
           </div>
         </div>
       )}
@@ -467,7 +467,7 @@ export default function RapportTab({ locs, subEmail }: { locs: Loc[]; subEmail: 
                       <path d="M3.5 5.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" fill="none"/>
                       <circle cx="5.5" cy="3.5" r=".5" fill="#94a3b8"/>
                     </svg>
-                    <span style={{ fontSize: 10, color: '#94a3b8' }}>Generert av AI — kan inneholde feil. Sjekk alltid offisielle farevarsler.</span>
+                    <span style={{ fontSize: 10, color: '#94a3b8' }}>Automatisk generert — kan inneholde feil. Sjekk alltid offisielle farevarsler.</span>
                   </div>
                 </>
               )}

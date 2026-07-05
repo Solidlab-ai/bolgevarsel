@@ -128,7 +128,7 @@ export default function HjelpPage() {
           '@context': 'https://schema.org',
           '@type': 'FAQPage',
           mainEntity: [
-            { '@type': 'Question', name: 'Hva er Bølgevarsel?', acceptedAnswer: { '@type': 'Answer', text: 'Bølgevarsel er en norsk tjeneste som sender daglig sjø- og værvarsel på e-post og SMS — med AI-oppsummering, bølger, vind, temperatur og værikon, skreddersydd for din kystlokasjon.' } },
+            { '@type': 'Question', name: 'Hva er Bølgevarsel?', acceptedAnswer: { '@type': 'Answer', text: 'Bølgevarsel er en norsk tjeneste som sender daglig sjø- og værvarsel på e-post og SMS — med skreddersydd oppsummering, bølger, vind, temperatur og værikon, skreddersydd for din kystlokasjon.' } },
             { '@type': 'Question', name: 'Når sendes varselet?', acceptedAnswer: { '@type': 'Answer', text: 'Standard er kl. 12:00, men du velger selv mellom 04:00 og 12:00 — per abonnement eller per mottaker.' } },
             { '@type': 'Question', name: 'Hvilke lokasjoner støttes?', acceptedAnswer: { '@type': 'Answer', text: 'Vi støtter hele norskekysten via Open-Meteo Marine API og met.no.' } },
             { '@type': 'Question', name: 'Kan jeg ha flere mottakere?', acceptedAnswer: { '@type': 'Answer', text: 'Ja, du kan ha opptil 5 mottakere per lokasjon — for eksempel deg selv, ektefelle og svigerforeldre.' } },

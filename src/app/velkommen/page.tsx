@@ -24,7 +24,7 @@ export default function Velkommen() {
       ikon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 11 Q4.5 7 7 11 Q9.5 15 12 11 Q14.5 7 17 11" stroke="#1a6080" strokeWidth="1.5" strokeLinecap="round" fill="none"/><path d="M2 14.5 Q4.5 12 7 14.5 Q9.5 17 12 14.5 Q14.5 12 17 14.5" stroke="#1a6080" strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5"/><circle cx="14" cy="4" r="2.5" fill="#f59e0b"/><path d="M14 0.5L14 1.5M14 6.5L14 7.5M10.5 4L11.5 4M16.5 4L17.5 4M11.5 1.5L12.2 2.2M16.5 1.5L15.8 2.2" stroke="#f59e0b" strokeWidth="1" strokeLinecap="round"/></svg>
       ),
-      tekst: 'Fra i morgen mottar du daglig bølge- og værvarsel — på SMS og e-post.',
+      tekst: 'Fra i morgen mottar du daglig bølge- og værvarsel — rett i appen. E-post og SMS er også tilgjengelig.',
     },
   ]
 

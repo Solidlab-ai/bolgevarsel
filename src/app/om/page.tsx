@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Om oss — Bølgevarsel',
-  description: 'Bølgevarsel er en venture fra Solidlab.ai i Stavanger — en SaaS-tjeneste som leverer daglig sjøvarsel på SMS for norskekysten.',
+  description: 'Bølgevarsel er en venture fra Solidlab.ai i Stavanger — en SaaS-tjeneste som leverer daglig sjøvarsel rett i appen for norskekysten.',
   alternates: { canonical: 'https://bolgevarsel.no/om' },
 }
 
@@ -47,7 +47,7 @@ export default function OmPage() {
           fontSize:'1.15rem',color:'#2c4a5e',
           lineHeight:1.6,margin:'0 0 3rem',
         }}>
-          Bølgevarsel er bygget for folk som er glad i sjøen — og som er lei av å scrolle gjennom åtte vær-apper hver morgen. Vi henter ferske data fra met.no og Open-Meteo Marine, analyserer dem for kysten din, og sender deg det viktigste på SMS og e-post.
+          Bølgevarsel er bygget for folk som er glad i sjøen — og som er lei av å scrolle gjennom åtte vær-apper hver morgen. Vi henter ferske data fra met.no og Open-Meteo Marine, analyserer dem for kysten din, og sender deg det viktigste rett i appen — med e-post og SMS som alternativ.
         </p>
 
         <section style={{
@@ -107,7 +107,7 @@ export default function OmPage() {
 
         <div style={{display:'grid',gap:'1.25rem',marginBottom:'3rem'}}>
           {[
-            { tittel:'Norsk og kortfattet', tekst:'Vi skriver på norsk, holder oss til det viktigste, og kutter det som ikke betyr noe. SMS-en skal kunne leses på 10 sekunder.' },
+            { tittel:'Norsk og kortfattet', tekst:'Vi skriver på norsk, holder oss til det viktigste, og kutter det som ikke betyr noe. Varselet skal kunne leses på 10 sekunder.' },
             { tittel:'Pålitelige datakilder', tekst:'Vi bruker offisielle data fra met.no (Meteorologisk institutt) og Open-Meteo Marine. Ingen oppspinn, ingen reklame som forstyrrer varselet.' },
             { tittel:'Personvern på alvor', tekst:'Vi lagrer kun det vi trenger for å levere tjenesten. Ingen tracking-pixels for tredjeparter, ingen videresalg av data. Du kan slette kontoen din når som helst.' },
             { tittel:'Sikkerhet først', tekst:'Kritiske farevarsler kan ikke skrus av — selv om du har valgt å pause vanlige varsler. Vi prioriterer alltid sikkerheten din på sjøen.' },

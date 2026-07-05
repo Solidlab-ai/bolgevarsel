@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Bølgevarsel – Daglig sjøvarsel på SMS'
+export const alt = 'Bølgevarsel – Daglig sjøvarsel rett i appen'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -32,7 +32,7 @@ export default async function Image() {
 
         {/* Tagline */}
         <div style={{ fontSize: 28, color: 'rgba(255,255,255,0.75)', fontFamily: 'sans-serif', fontWeight: 300, textAlign: 'center', maxWidth: 700, lineHeight: 1.4, display: 'flex' }}>
-          Daglig sjøvarsel på SMS — levert når du vil
+          Daglig sjøvarsel rett i appen — levert når du vil
         </div>
 
         {/* SMS-preview boks */}

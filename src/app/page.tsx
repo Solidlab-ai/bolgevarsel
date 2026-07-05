@@ -4,10 +4,10 @@ import Hero from '@/components/Hero'
 import HowItWorks from '@/components/HowItWorks'
 import ForWho from '@/components/ForWho'
 import Pricing from '@/components/Pricing'
+import FaqBolger from '@/components/FaqBolger'
 import Footer from '@/components/Footer'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Bølgevarsel – Daglig sjøvarsel på SMS',
@@ -97,6 +97,7 @@ export default function Home() {
         </svg>
       </div>
       <Pricing />
+      <FaqBolger />
       <Footer />
     </main>
   )

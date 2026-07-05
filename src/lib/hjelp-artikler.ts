@@ -23,7 +23,7 @@ export const ARTIKLER: Record<string, Artikkel> = {
 <li>Daglig <strong>e-postrapport</strong> med fullstendig oversikt og timesvarsel</li>
 <li>Daglig <strong>SMS-varsel</strong> med kortfattet værinformasjon</li>
 <li>Automatisk <strong>kritisk farevarsel</strong> ved kuling og farlige forhold</li>
-<li><strong>AI-oppsummering</strong> som forklarer dagens forhold i klartekst, tilpasset aktiviteten din</li>
+<li><strong>Skreddersydd oppsummering</strong> som forklarer dagens forhold i klartekst, tilpasset aktiviteten din</li>
 <li>Tilgang til <strong>Min side</strong> med rapportgenerator, kart og full kontroll over varsler</li>
 <li>Bølgehøyde, vind, bølgeperiode, sjø- og lufttemperatur — pluss soloppgang og solnedgang</li>
 </ul>
@@ -259,7 +259,7 @@ bolgevarsel.no
 <p>E-postrapporten gir en komplett gjennomgang av sjø- og værsituasjonen. Den er mer detaljert enn SMS og inneholder trender fremover i tid.</p>
 <h2>Innholdet i rapporten</h2>
 <ul>
-<li><strong>AI-oppsummering</strong> — en kort tekst som forklarer dagens forhold i klartekst, tilpasset aktivitetsprofilen din</li>
+<li><strong>Skreddersydd oppsummering</strong> — en kort tekst som forklarer dagens forhold i klartekst, tilpasset aktivitetsprofilen din</li>
 <li><strong>Dagens forhold</strong> — bølgehøyde, vind, bølgeperiode, luft- og sjøtemperatur</li>
 <li><strong>Værikon</strong> — himmelforhold (sol, skyer, regn) ved siden av sjøtilstanden</li>
 <li><strong>Timesvarsel</strong> — bølgesøyler per time med fargekode og beste tidspunkt på dagen</li>
@@ -503,7 +503,7 @@ bolgevarsel.no
 </ol>
 <h2>Hva vises i rapporten?</h2>
 <ul>
-<li>AI-oppsummering og daglig vurdering tilpasset aktivitetsprofilen din</li>
+<li>Skreddersydd oppsummering og daglig vurdering tilpasset aktivitetsprofilen din</li>
 <li>Værikon for himmelforhold (sol, skyer, regn) ved siden av sjøtilstanden</li>
 <li>Bølgesøyler per time med beste tidspunkt på dagen</li>
 <li>Lufttemperatur og sjøtemperatur</li>
@@ -721,7 +721,7 @@ Vind 3.1/5.4m/s, Bolger 0.6m
 <p>Min side er kontrollsenteret ditt i Bølgevarsel. Her styrer du alt selv — lokasjoner, mottakere, varsler og abonnement.</p>
 <h2>Fanene på Min side</h2>
 <ul>
-<li><strong>Lokasjoner</strong> — legg til og følg kyststeder. Klikk en lokasjon for live sjødata, værikon, AI-oppsummering og kart.</li>
+<li><strong>Lokasjoner</strong> — legg til og følg kyststeder. Klikk en lokasjon for live sjødata, værikon, oppsummering og kart.</li>
 <li><strong>Mottakere</strong> — legg til hvem som skal få varsler, med egen aktivitetsprofil og leveringstidspunkt per person. CSV-import for mange mottakere.</li>
 <li><strong>Rapport</strong> — generer en sjørapport på forespørsel for 1–7 dager frem, last ned som PDF eller send på e-post.</li>
 <li><strong>Konto</strong> — leveringstidspunkt, push-varsler, kvitteringer, frys/reaktiver abonnement og slett konto.</li>

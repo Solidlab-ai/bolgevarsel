@@ -6,7 +6,7 @@ import styles from './FaqBolger.module.css'
 const faqer = [
   {
     sporsmal: 'Er det bølger i dag?',
-    svar: 'Bølgeforholdene langs norskekysten endrer seg time for time med vind og hav. Bølgevarsel henter ferske sjødata for din kystlokasjon og sender dagens bølgehøyde, vind og sjøvær rett på SMS hver morgen — så du vet svaret før du drar ut.',
+    svar: 'Bølgeforholdene langs norskekysten endrer seg time for time med vind og hav. Bølgevarsel henter ferske sjødata for din kystlokasjon og sender dagens bølgehøyde, vind og sjøvær rett i appen hver morgen — så du vet svaret før du drar ut.',
   },
   {
     sporsmal: 'Hvor høye er bølgene i dag?',
@@ -25,8 +25,8 @@ const faqer = [
     svar: 'Hele norskekysten fra Lindesnes til Nordkapp. Du velger dine egne kyststeder — hytta, favorittfiskeplassen eller surfestranda — og får varsel skreddersydd for hvert sted.',
   },
   {
-    sporsmal: 'Hva koster det å få bølgevarsel på SMS?',
-    svar: 'Bølgevarsel starter på 49 kr/mnd for daglig sjøvarsel på SMS. Du kan velge flere steder og tidspunkt, og farevarsel er alltid inkludert.',
+    sporsmal: 'Hva koster det å få bølgevarsel?',
+    svar: 'Bølgevarsel starter på 49 kr/mnd for daglig sjøvarsel rett i appen (også på e-post og SMS). Du kan velge flere steder og tidspunkt, og farevarsel på SMS er alltid inkludert.',
   },
 ]
 
@@ -52,7 +52,7 @@ export default function FaqBolger() {
         <h2 id="faq-bolger-tittel" className={styles.tittel}>Er det bølger i dag?</h2>
         <p className={styles.ingress}>
           Lurer du på bølgeforholdene langs kysten? Her er svarene på det folk oftest
-          lurer på — og hvordan du får dagens sjøvarsel rett på SMS.
+          lurer på — og hvordan du får dagens sjøvarsel rett i appen.
         </p>
 
         <div className={styles.liste}>

@@ -32,7 +32,7 @@ const personas = [
       { ikon: IkonSMS, tekst: 'Nedbørsvarsel — regntøy eller shorts?' },
       { ikon: IkonFare, tekst: 'Kritisk farevarsel til alle på SMS' },
     ],
-    funksjoner: ['Aktivitetsprofil: Barn/ungdom med båt', 'Daglig rapport kl. du velger', 'SMS til opptil 5 familiemedlemmer', '7 dagers gratis prøveperiode'],
+    funksjoner: ['Aktivitetsprofil: Barn/ungdom med båt', 'Daglig rapport kl. du velger', 'Varsel til opptil 5 familiemedlemmer', '7 dagers gratis prøveperiode'],
   },
   {
     img: '/images/baateier-ny.jpg',
@@ -58,9 +58,9 @@ const personas = [
       { ikon: IkonBolge, tekst: 'Bølgehøyde og periode' },
       { ikon: IkonVind, tekst: 'Vindstyrke og retning' },
       { ikon: IkonTemp, tekst: 'Sjøtemperatur' },
-      { ikon: IkonSMS, tekst: 'SMS fra kl. 04:00' },
+      { ikon: IkonSMS, tekst: 'Varsel fra kl. 04:00' },
     ],
-    funksjoner: ['Aktivitetsprofil: Fisker', 'Vurdering: trygt å legge ut?', 'Daglig SMS på valgfritt tidspunkt', 'Kritisk farevarsel alltid på'],
+    funksjoner: ['Aktivitetsprofil: Fisker', 'Vurdering: trygt å legge ut?', 'Daglig varsel på valgfritt tidspunkt', 'Kritisk farevarsel alltid på'],
   },
   {
     img: '/images/surfer-ny.jpg',

@@ -10,12 +10,12 @@ import Footer from '@/components/Footer'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Bølgevarsel – Daglig sjøvarsel på SMS',
-  description: 'Få daglig bølge- og værvarsel direkte på SMS — skreddersydd for din kystlokasjon langs norskekysten. Enkelt, pålitelig og norsk.',
+  title: 'Bølgevarsel – Daglig sjøvarsel rett i appen',
+  description: 'Få daglig bølge- og værvarsel rett i appen — skreddersydd for din kystlokasjon langs norskekysten. Farevarsel på SMS alltid inkludert. Enkelt, pålitelig og norsk.',
   alternates: { canonical: 'https://bolgevarsel.no' },
   openGraph: {
-    title: 'Bølgevarsel – Daglig sjøvarsel på SMS',
-    description: 'Daglig sjøvarsel på SMS for norskekysten. Velg lokasjon og tidspunkt — vi gjør resten.',
+    title: 'Bølgevarsel – Daglig sjøvarsel rett i appen',
+    description: 'Daglig sjøvarsel rett i appen for norskekysten. Velg lokasjon og tidspunkt — vi gjør resten.',
     url: 'https://bolgevarsel.no',
   },
 }
@@ -30,7 +30,7 @@ export default function Home() {
           '@type': 'WebSite',
           name: 'Bølgevarsel',
           url: 'https://bolgevarsel.no',
-          description: 'Daglig bølge- og sjøvarsel på SMS for norskekysten',
+          description: 'Daglig bølge- og sjøvarsel rett i appen for norskekysten',
           publisher: {
             '@type': 'Organization',
             name: 'Solidlab.ai',

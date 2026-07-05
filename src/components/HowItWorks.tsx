@@ -32,8 +32,8 @@ const steps = [
   {
     num: '03',
     title: 'Du mottar din daglige sjørapport',
-    desc: 'Kortfattet SMS med det viktigste, detaljert e-postrapport med timesvarsel og profilspesifikke AI-tips — pluss on-demand rapport på Min side.',
-    details: ['SMS med bølge, vind og temperatur', 'E-post med time-for-time graf', 'AI-oppsummering per aktivitetsprofil', 'Rapportgenerator — sjekk 7 dager frem'],
+    desc: 'Push-varsel i appen med det viktigste, detaljert rapport på Min side med timesvarsel og profilspesifikke AI-tips — e-post og SMS som backup.',
+    details: ['Push-varsel i appen med bølge, vind og temperatur', 'Min side med time-for-time graf', 'AI-oppsummering per aktivitetsprofil', 'Rapportgenerator — sjekk 7 dager frem'],
     icon: (
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
         <rect x="7" y="2" width="12" height="20" rx="2.5" stroke="currentColor" strokeWidth="1.6" fill="none"/>

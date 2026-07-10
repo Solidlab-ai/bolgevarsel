@@ -49,7 +49,6 @@ const CATEGORY_META: Record<Category, { label: string; color: string }> = {
   marketing:      { label: 'Marketing',    color: '#f472b6' },
 }
 
-const ADMIN_KEY = 'ulrik-admin-2026'
 
 
 // =====================================================================
@@ -69,7 +68,7 @@ export default function RoadmapClient({ initialItems }: { initialItems: RoadmapI
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
 
   async function refresh() {
-    const r = await fetch('/api/admin/roadmap', { headers: { 'x-admin-key': ADMIN_KEY } })
+    const r = await fetch('/api/admin/roadmap')
     const d = await r.json()
     if (d.items) setItems(d.items)
   }
@@ -79,7 +78,7 @@ export default function RoadmapClient({ initialItems }: { initialItems: RoadmapI
     setItems(items.map((i) => (i.id === id ? { ...i, status: newStatus } : i)))
     const r = await fetch('/api/admin/roadmap', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: newStatus }),
     })
     if (!r.ok) {
@@ -94,7 +93,7 @@ export default function RoadmapClient({ initialItems }: { initialItems: RoadmapI
     if (!confirm('Slett dette item-et permanent?')) return
     const r = await fetch('/api/admin/roadmap', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
     if (r.ok) setItems(items.filter((i) => i.id !== id))
@@ -165,7 +164,7 @@ export default function RoadmapClient({ initialItems }: { initialItems: RoadmapI
     // Send til backend
     fetch('/api/admin/roadmap', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ updates: allUpdates }),
     })
       .then((r) => {
@@ -301,7 +300,7 @@ export default function RoadmapClient({ initialItems }: { initialItems: RoadmapI
             const isNew = !editingItem
             const r = await fetch('/api/admin/roadmap', {
               method: isNew ? 'POST' : 'PATCH',
-              headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(isNew ? payload : { ...payload, id: editingItem!.id }),
             })
             if (r.ok) {

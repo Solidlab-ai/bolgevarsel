@@ -25,7 +25,7 @@ export default function NodvarslerClient({ alerts, contacts }: Props) {
     try {
       const res = await fetch('/api/admin/send-sms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: smsTo, message: smsText }),
       })
       const d = await res.json()

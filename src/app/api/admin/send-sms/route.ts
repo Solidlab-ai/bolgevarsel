@@ -1,11 +1,9 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { isAdmin as checkAdmin } from '@/lib/adminAuth'
 
 export async function POST(req: NextRequest) {
-  const adminKey = req.headers.get('x-admin-key')
-  if (adminKey !== 'ulrik-admin-2026') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  if (!checkAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { to, message } = await req.json()
   if (!to || !message) {

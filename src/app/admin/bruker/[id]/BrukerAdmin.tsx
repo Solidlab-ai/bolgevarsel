@@ -1,13 +1,14 @@
 'use client'
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Innsikt, { Betaling } from './Innsikt'
 
 const inp: React.CSSProperties = { padding: '0.7rem 1rem', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', color: 'white', fontSize: '0.9rem', fontFamily: 'inherit', outline: 'none', width: '100%', boxSizing: 'border-box' }
 const btn = (farge: string, tekst: string): React.CSSProperties => ({ background: farge, color: 'white', padding: '0.6rem 1.2rem', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, whiteSpace: 'nowrap' as const })
 const sectionStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: '1.2rem 1.4rem', border: '1px solid rgba(255,255,255,0.07)', marginBottom: '1rem' }
 const labelStyle: React.CSSProperties = { fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem', display: 'block' }
 
-export default function BrukerAdmin({ sub }: { sub: any }) {
+export default function BrukerAdmin({ sub, insight }: { sub: any; insight: any }) {
   const router = useRouter()
   const [melding, setMelding] = useState<{ tekst: string; ok: boolean } | null>(null)
   const [nyEpost, setNyEpost] = useState(sub.email)
@@ -32,7 +33,7 @@ export default function BrukerAdmin({ sub }: { sub: any }) {
 
   async function patch(felt: string, verdi: any) {
     setLoading(felt)
-    const r = await fetch('/api/admin/bruker', { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' }, body: JSON.stringify({ subscriber_id: sub.id, field: felt, value: verdi }) })
+    const r = await fetch('/api/admin/bruker', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscriber_id: sub.id, field: felt, value: verdi }) })
     const d = await r.json()
     setLoading(null)
     if (d.subscriber) { vis('✅ Lagret!'); router.refresh() }
@@ -41,7 +42,7 @@ export default function BrukerAdmin({ sub }: { sub: any }) {
 
   async function slettMottaker(id: string) {
     if (!confirm('Slett mottaker?')) return
-    await fetch('/api/admin/mottaker', { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' }, body: JSON.stringify({ id }) })
+    await fetch('/api/admin/mottaker', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
     vis('✅ Mottaker slettet'); router.refresh()
   }
 
@@ -79,6 +80,9 @@ export default function BrukerAdmin({ sub }: { sub: any }) {
             </div>
           </div>
         </div>
+        {/* KUNDEINNSIKT */}
+        <Innsikt sub={sub} insight={insight} />
+
         {/* KONTOSTATUS */}
         <div style={sectionStyle}>
           <span style={labelStyle}>Kontostatus</span>
@@ -138,15 +142,8 @@ export default function BrukerAdmin({ sub }: { sub: any }) {
           ))}
         </div>
 
-        {/* STRIPE */}
-        <div style={sectionStyle}>
-          <span style={labelStyle}>Stripe</span>
-          <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.4rem' }}>Customer ID: {sub.stripe_customer_id || '—'}</div>
-          {sub.stripe_customer_id && (
-            <a href={`https://dashboard.stripe.com/customers/${sub.stripe_customer_id}`} target="_blank" rel="noopener noreferrer"
-              style={{ color: '#4da8cc', fontSize: '0.85rem', textDecoration: 'none' }}>↗ Åpne i Stripe Dashboard</a>
-          )}
-        </div>
+        {/* BETALING */}
+        <Betaling sub={sub} insight={insight} />
 
         {/* NOTATER */}
         <div style={sectionStyle}>

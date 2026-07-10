@@ -1,11 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
-
-const checkAdmin = (req: NextRequest) => {
-  const key = req.headers.get('x-admin-key')
-  return key === (process.env.FAREVARSEL_ADMIN_KEY || 'ulrik-admin-2026')
-}
+import { isAdmin as checkAdmin } from '@/lib/adminAuth'
 
 export async function GET(req: NextRequest) {
   if (!checkAdmin(req)) return NextResponse.json({error:'Unauthorized'},{status:401})

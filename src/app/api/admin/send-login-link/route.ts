@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { isAdmin as checkAdmin } from '@/lib/adminAuth'
 
-const checkAdmin = (req: NextRequest) =>
-  req.cookies.get('bv_admin')?.value === (process.env.ADMIN_SECRET || '')
 
 export async function POST(req: NextRequest) {
   if (!checkAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

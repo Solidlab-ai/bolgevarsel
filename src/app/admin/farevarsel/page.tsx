@@ -103,8 +103,7 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
     const r = await fetch(SUPABASE_URL + '/functions/v1/farevarsel', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': 'ulrik-admin-2026'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ melding, alvorlighetsniva: valgtNiva })
     })

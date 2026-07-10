@@ -1,11 +1,8 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { isAdmin as checkAdmin } from '@/lib/adminAuth'
 
-const checkAdmin = (req: NextRequest) => {
-  const key = req.headers.get('x-admin-key')
-  return key === (process.env.FAREVARSEL_ADMIN_KEY || 'ulrik-admin-2026')
-}
 
 // GET - hent alle items, sortert per kolonne (status) og posisjon
 export async function GET(req: NextRequest) {

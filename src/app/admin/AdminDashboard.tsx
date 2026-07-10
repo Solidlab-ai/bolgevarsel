@@ -49,7 +49,7 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
     try {
       const res = await fetch('/api/admin/send-sms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: smsTo, message: smsText }),
       })
       const d = await res.json()
@@ -67,7 +67,7 @@ export default function AdminDashboard({ subscribers, stats, planTelling }: Prop
   }
 
   async function oppdaterStatus(id: string, status: string) {
-    await fetch('/api/admin/bruker', { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'x-admin-key': 'ulrik-admin-2026' }, body: JSON.stringify({ subscriber_id: id, field: 'status', value: status }) })
+    await fetch('/api/admin/bruker', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscriber_id: id, field: 'status', value: status }) })
     window.location.reload()
   }
 
